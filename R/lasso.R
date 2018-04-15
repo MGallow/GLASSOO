@@ -10,7 +10,7 @@
 #' \url{https:#mgallow.github.io/GLASSO/}.
 #'
 #' @param X matrix or data frame
-#' @param y matrix or data frame of response values
+#' @param Y matrix or data frame of response values
 #' @param lam tuning parameter for lasso regularization term. Defaults to 'lam = 0.1'
 #' @param crit criterion for convergence. Criterion \code{obj} will loop until the change in the objective after an iteration over the parameter set is less than \code{tol}. Criterion \code{max} will loop until the maximum change in the estimate after an iteration over the parameter set is less than \code{tol}. Defaults to \code{obj}.
 
