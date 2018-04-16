@@ -4,27 +4,27 @@
 \alias{lassoc}
 \title{Lasso Regression (c++)}
 \usage{
-lassoc(X, Y, ind, lam = 0.1, crit = "obj", tol = 1e-04, maxit = 10000)
+lassoc(X, Y, ind, lam = 0.1, crit = "max", tol = 1e-04, maxit = 10000)
 }
 \arguments{
 \item{X}{matrix or data frame}
+
+\item{Y}{matrix or data frame of response values}
 
 \item{ind}{optional matrix specifying which coefficients will be penalized.}
 
 \item{lam}{tuning parameter for lasso regularization term. Defaults to 'lam = 0.1'}
 
-\item{crit}{criterion for convergence. Criterion \code{obj} will loop until the change in the objective after an iteration over the parameter set is less than \code{tol}. Criterion \code{max} will loop until the maximum change in the estimate after an iteration over the parameter set is less than \code{tol}. Defaults to \code{obj}.}
+\item{crit}{criterion for convergence. Criterion \code{loss} will loop until the change in the objective after an iteration over the parameter set is less than \code{tol}. Criterion \code{max} will loop until the maximum change in the estimate after an iteration over the parameter set is less than \code{tol}. Defaults to \code{max}.}
 
 \item{tol}{tolerance for algorithm convergence. Defaults to 1e-4}
 
 \item{maxit}{maximum iterations. Defaults to 1e4}
-
-\item{y}{matrix or data frame of response values}
 }
 \value{
 returns list of returns which includes:
 \item{Iterations}{number of iterations.}
-\item{Objective}{value of the objective function.}
+\item{Loss}{value of the objective function.}
 \item{Coefficients}{estimated regression coefficients.}
 \item{H}{update H matrix.}
 }

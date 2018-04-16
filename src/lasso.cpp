@@ -21,13 +21,13 @@ using namespace Rcpp;
 //' @param Y matrix or data frame of response values
 //' @param ind optional matrix specifying which coefficients will be penalized.
 //' @param lam tuning parameter for lasso regularization term. Defaults to 'lam = 0.1'
-//' @param crit criterion for convergence. Criterion \code{obj} will loop until the change in the objective after an iteration over the parameter set is less than \code{tol}. Criterion \code{max} will loop until the maximum change in the estimate after an iteration over the parameter set is less than \code{tol}. Defaults to \code{obj}.
+//' @param crit criterion for convergence. Criterion \code{loss} will loop until the change in the objective after an iteration over the parameter set is less than \code{tol}. Criterion \code{max} will loop until the maximum change in the estimate after an iteration over the parameter set is less than \code{tol}. Defaults to \code{loss}.
 //' @param tol tolerance for algorithm convergence. Defaults to 1e-4
 //' @param maxit maximum iterations. Defaults to 1e4
 //' 
 //' @return returns list of returns which includes:
 //' \item{Iterations}{number of iterations.}
-//' \item{Objective}{value of the objective function.}
+//' \item{Loss}{value of the objective function.}
 //' \item{Coefficients}{estimated regression coefficients.}
 //' \item{H}{update H matrix.}
 //' 
@@ -44,15 +44,16 @@ using namespace Rcpp;
 //' @keywords internal
 //'
 // [[Rcpp::export]]
-List lassoc(const arma::mat &X, const arma::mat &Y, const arma::mat &ind, const double lam = 0.1, std::string crit = "obj", const double tol = 1e-4, const double maxit = 1e4){
+List lassoc(const arma::mat &X, const arma::mat &Y, const arma::mat &ind, const double lam = 0.1, std::string crit = "loss", const double tol = 1e-4, const double maxit = 1e4){
 
   // allocate memory
   int P = X.n_cols, R = Y.n_cols, iter;
-  double obj, obj2, temp;
+  double loss, loss2, temp;
   bool criterion = true;
   arma::mat B, B2, H, H2;
   B = B2 = H = H2 = arma::zeros<arma::mat>(P, R);
-  iter = obj = obj2 = temp = 0;
+  iter = temp = 0;
+  loss2 = arma::accu(Y % Y)/2;
   
   // save values
   arma::mat XX = arma::trans(X)*X;
@@ -64,36 +65,42 @@ List lassoc(const arma::mat &X, const arma::mat &Y, const arma::mat &ind, const 
 
     // keep old values
     B = B2;
-    obj = obj2;
+    loss = loss2;
     
     // loop over all entries of beta
     for (int r = 0; r < R; r++){
       for (int p = 0; p < P; p++){
         
-        // update betas
-        B2(p, r) = softc(XY(p, r) - H(p, r), lam*ind(p, r))/XX(p, p);
-        temp = 0;
+        // update betas by soft thresholding
+        B2(p, r) = softc(XY(p, r) - H2(p, r), lam*ind(p, r))/XX(p, p);
         
-        // update H, if necessary
+        // if updated beta is different, update H matrix
         if (B2(p, r) != B(p, r)){
           
-          // update each element in column r, except p
+          // update each element in column r of H, except p
+          temp = 0;
+          H = H2;
           for (int p_ = 0; p_ < P; p_++){
             if (p_ != p){
               
               // update all rows except row p
-              H2(p_, r) = H(p_, r) - XX(p_, p)*(B(p, r) - B2(p, r));
+              H2(p_, r) -= XX(p_, p)*(B(p, r) - B2(p, r));
               
-              // create temporary sum used in objective, if necessary
-              if (crit == "obj"){
-                temp += B(p_, r)*(H2(p_, r) - H(p_, r));
+              // create temporary sum used in loss function, if necessary
+              if (crit == "loss"){
+               //temp += B(p_, r)*(H2(p_, r) - H(p_, r));
+               temp += B2(p_, r)*XX(p_, p);
+               
               }
             }
           }
           
-          // update objective function, if necessary
-          if (crit == "obj"){
-            obj2 = obj + (B(p, r) - B2(p, r))*(XY(p, r) - H(p, r)/2) + (std::pow(B2(p, r), 2) - std::pow(B(p, r), 2))*XX(p, p)/2 + temp/2 + lam*(std::abs(B2(p, r)) - std::abs(B(p, r)));
+          // update loss, if necessary
+          if (crit == "loss"){
+           //loss2 += (B(p, r) - B2(p, r))*(XY(p, r) - H(p, r)/2) + (std::pow(B2(p, r), 2) - std::pow(B(p, r), 2))*XX(p, p)/2 + temp/2 + lam*ind(p,r)*(std::abs(B2(p, r)) - std::abs(B(p, r))); 
+           //loss2 += (B(p, r) - B2(p, r))*XY(p, r) + (std::pow(B2(p, r), 2) - std::pow(B(p, r), 2))*XX(p, p)/2 + lam*ind(p,r)*(std::abs(B2(p, r)) - std::abs(B(p, r))); 
+           loss2 += (B(p, r) - B2(p, r))*(XY(p, r) - temp) + (std::pow(B2(p, r), 2) - std::pow(B(p, r), 2))*XX(p, p)/2 + lam*ind(p,r)*(std::abs(B2(p, r)) - std::abs(B(p, r)));
+            
           }
         }
       }
@@ -101,10 +108,10 @@ List lassoc(const arma::mat &X, const arma::mat &Y, const arma::mat &ind, const 
     
     // stopping criterion
     iter++;
-    if (crit == "obj"){
+    if (crit == "loss"){
       
-      // compute objective improvement
-      criterion = (std::abs(obj2 - obj) > tol);
+      // compute loss improvement
+      criterion = (std::abs(loss2 - loss) > tol);
       
     } else {
       
@@ -120,12 +127,12 @@ List lassoc(const arma::mat &X, const arma::mat &Y, const arma::mat &ind, const 
   }
   
   // compute final objective function value, if necessary
-  if (crit != "obj"){
-    obj2 = std::pow(arma::norm(Y - X*B2, "fro"), 2)/2 + lam*arma::accu(arma::abs(ind % B2));
+  if (crit != "loss"){
+    loss2 = std::pow(arma::norm(Y - X*B2, "fro"), 2)/2 + lam*arma::accu(arma::abs(ind % B2));
   }
 
   return List::create(Named("Iterations") = iter,
-                      Named("Objective") = obj2,
+                      Named("Loss") = loss2,
                       Named("Coefficients") = B2,
                       Named("H") = H2);
 

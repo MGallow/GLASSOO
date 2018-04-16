@@ -12,15 +12,14 @@
 #' @param X matrix or data frame
 #' @param Y matrix or data frame of response values
 #' @param lam tuning parameter for lasso regularization term. Defaults to 'lam = 0.1'
-#' @param crit criterion for convergence. Criterion \code{obj} will loop until the change in the objective after an iteration over the parameter set is less than \code{tol}. Criterion \code{max} will loop until the maximum change in the estimate after an iteration over the parameter set is less than \code{tol}. Defaults to \code{obj}.
-
+#' @param crit criterion for convergence. Criterion \code{loss} will loop until the change in the objective after an iteration over the parameter set is less than \code{tol}. Criterion \code{max} will loop until the maximum change in the estimate after an iteration over the parameter set is less than \code{tol}. Defaults to \code{loss}.
 #' @param tol tolerance for algorithm convergence. Defaults to 1e-4
 #' @param maxit maximum iterations. Defaults to 1e4
 #' @param ind optional matrix specifying which coefficients will be penalized.
 #' 
 #' @return returns list of returns which includes:
 #' \item{Iterations}{number of iterations.}
-#' \item{Objective}{value of the objective function.}
+#' \item{Loss}{value of the objective function.}
 #' \item{Coefficients}{estimated regression coefficients.}
 #' 
 #' @references
@@ -36,7 +35,7 @@
 #' @export
 
 # we define the lasso function
-lasso = function(X, Y, lam = 0.1, crit = "obj", tol = 1e-04, 
+LASSO = function(X, Y, lam = 0.1, crit = "loss", tol = 1e-04, 
     maxit = 10000, ind = NULL) {
     
     # checks
@@ -58,7 +57,7 @@ lasso = function(X, Y, lam = 0.1, crit = "obj", tol = 1e-04,
     LASSO = lassoc(X = X, Y = Y, ind = ind, lam = lam, crit = crit, 
         tol = tol, maxit = maxit)
     
-    returns = list(Iterations = LASSO$Iterations, Objective = LASSO$Objective, 
+    returns = list(Iterations = LASSO$Iterations, Loss = LASSO$Loss, 
         Coefficients = LASSO$Coefficients)
     return(returns)
     
