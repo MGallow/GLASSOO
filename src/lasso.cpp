@@ -17,8 +17,9 @@ using namespace Rcpp;
 //' @details For details on the implementation of 'GLASSO', see the vignette
 //' \url{https://mgallow.github.io/GLASSO/}.
 //'
-//' @param X matrix or data frame
-//' @param Y matrix or data frame of response values
+//' @param XX matrix
+//' @param XY matrix
+//' @param initB initialization for beta regression coefficients.
 //' @param ind optional matrix specifying which coefficients will be penalized.
 //' @param lam tuning parameter for lasso regularization term. Defaults to 'lam = 0.1'
 //' @param crit criterion for convergence. Criterion \code{loss} will loop until the change in the objective after an iteration over the parameter set is less than \code{tol}. Criterion \code{max} will loop until the maximum change in the estimate after an iteration over the parameter set is less than \code{tol}. Defaults to \code{loss}.
@@ -27,7 +28,6 @@ using namespace Rcpp;
 //' 
 //' @return returns list of returns which includes:
 //' \item{Iterations}{number of iterations.}
-//' \item{Loss}{value of the objective function.}
 //' \item{Coefficients}{estimated regression coefficients.}
 //' \item{H}{update H matrix.}
 //' 
@@ -44,21 +44,16 @@ using namespace Rcpp;
 //' @keywords internal
 //'
 // [[Rcpp::export]]
-List lassoc(const arma::mat &X, const arma::mat &Y, const arma::mat &ind, const double lam = 0.1, std::string crit = "loss", const double tol = 1e-4, const double maxit = 1e4){
+List lassoc(const arma::mat &XX, const arma::mat &XY, const arma::mat &initB, const arma::mat &ind, const double lam = 0.1, std::string crit = "loss", const double tol = 1e-4, const double maxit = 1e4){
 
   // allocate memory
-  int P = X.n_cols, R = Y.n_cols, iter;
+  int P = XX.n_cols, R = XY.n_cols, iter;
   double loss, loss2, temp;
   bool criterion = true;
   arma::mat B, B2, H, H2;
-  B = B2 = H = H2 = arma::zeros<arma::mat>(P, R);
-  iter = temp = 0;
-  loss2 = arma::accu(Y % Y)/2;
-  
-  // save values
-  arma::mat XX = arma::trans(X)*X;
-  arma::mat XY = arma::trans(X)*Y;
-  
+  H = H2 = arma::zeros<arma::mat>(P, R);
+  iter = loss = temp = 0;
+  B2 = initB;
   
   // loop until convergence
   while (criterion && (iter <= maxit)){
@@ -88,7 +83,6 @@ List lassoc(const arma::mat &X, const arma::mat &Y, const arma::mat &ind, const 
               
               // create temporary sum used in loss function, if necessary
               if (crit == "loss"){
-               //temp += B(p_, r)*(H2(p_, r) - H(p_, r));
                temp += B2(p_, r)*XX(p_, p);
                
               }
@@ -97,8 +91,6 @@ List lassoc(const arma::mat &X, const arma::mat &Y, const arma::mat &ind, const 
           
           // update loss, if necessary
           if (crit == "loss"){
-           //loss2 += (B(p, r) - B2(p, r))*(XY(p, r) - H(p, r)/2) + (std::pow(B2(p, r), 2) - std::pow(B(p, r), 2))*XX(p, p)/2 + temp/2 + lam*ind(p,r)*(std::abs(B2(p, r)) - std::abs(B(p, r))); 
-           //loss2 += (B(p, r) - B2(p, r))*XY(p, r) + (std::pow(B2(p, r), 2) - std::pow(B(p, r), 2))*XX(p, p)/2 + lam*ind(p,r)*(std::abs(B2(p, r)) - std::abs(B(p, r))); 
            loss2 += (B(p, r) - B2(p, r))*(XY(p, r) - temp) + (std::pow(B2(p, r), 2) - std::pow(B(p, r), 2))*XX(p, p)/2 + lam*ind(p,r)*(std::abs(B2(p, r)) - std::abs(B(p, r)));
             
           }
@@ -125,14 +117,8 @@ List lassoc(const arma::mat &X, const arma::mat &Y, const arma::mat &ind, const 
       R_CheckUserInterrupt();
     }
   }
-  
-  // compute final objective function value, if necessary
-  if (crit != "loss"){
-    loss2 = std::pow(arma::norm(Y - X*B2, "fro"), 2)/2 + lam*arma::accu(arma::abs(ind % B2));
-  }
 
   return List::create(Named("Iterations") = iter,
-                      Named("Loss") = loss2,
                       Named("Coefficients") = B2,
                       Named("H") = H2);
 

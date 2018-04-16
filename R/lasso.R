@@ -52,12 +52,20 @@ LASSO = function(X, Y, lam = 0.1, crit = "loss", tol = 1e-04,
         ind = matrix(1, nrow = p, ncol = r)
     }
     
+    # save values
+    XX = crossprod(X)
+    XY = crossprod(X, Y)
     
     # execute lassoc
-    LASSO = lassoc(X = X, Y = Y, ind = ind, lam = lam, crit = crit, 
+    init = matrix(0, nrow = ncol(X), ncol = ncol(Y))
+    LASSO = lassoc(XX = XX, XY = XY, initB = init, ind = ind, lam = lam, crit = crit, 
         tol = tol, maxit = maxit)
     
-    returns = list(Iterations = LASSO$Iterations, Loss = LASSO$Loss, 
+    
+    # compute loss
+    loss = sum((Y - X %*% LASSO$Coefficients)^2)/2 + lam*sum(abs(ind*LASSO$Coefficients))
+    
+    returns = list(Iterations = LASSO$Iterations, Loss = loss, 
         Coefficients = LASSO$Coefficients)
     return(returns)
     
