@@ -42,6 +42,8 @@ using namespace Rcpp;
 //' @author Matt Galloway \email{gall0441@@umn.edu}
 //' 
 //' @keywords internal
+//' 
+//' @export
 //'
 // [[Rcpp::export]]
 List lassoc(const arma::mat &XX, const arma::mat &XY, const arma::mat &initB, const arma::mat &ind, const double lam = 0.1, std::string crit = "loss", const double tol = 1e-4, const double maxit = 1e4){

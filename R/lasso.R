@@ -35,43 +35,48 @@
 #' @export
 
 # we define the lasso function
-LASSO = function(X, Y, lam = 0.1, crit = c("loss", "avg", "max"), tol = 1e-04, 
-    maxit = 10000, ind = matrix(1, ncol(X), ncol(Y))) {
+LASSO = function(X, Y, lam = 0.1, crit = c("loss", 
+    "avg", "max"), tol = 1e-04, maxit = 10000, 
+    ind = matrix(1, ncol(X), ncol(Y))) {
     
     # checks
     if (is.null(X) || is.null(Y)) {
-      stop("Must provide entry for X and Y!")
+        stop("Must provide entry for X and Y!")
     }
     if (lam <= 0) {
-      stop("lam must be positive!")
+        stop("lam must be positive!")
     }
     if (tol <= 0) {
-      stop("Entry must be positive!")
+        stop("Entry must be positive!")
     }
     if (maxit%%1 != 0) {
-      stop("Entry must be an integer!")
+        stop("Entry must be an integer!")
     }
-  
+    
     # match values
+    X = as.matrix(X)
+    Y = as.matrix(Y)
     crit = match.arg(crit)
     lam = sort(lam)
     call = match.call()
     
     # save values
-    XX = crossprod(as.matrix(X))
-    XY = crossprod(as.matrix(X), as.matrix(Y))
+    XX = crossprod(X)
+    XY = crossprod(X, Y)
     
     # execute lassoc
     init = matrix(0, nrow = ncol(X), ncol = ncol(Y))
-    LASSO = lassoc(XX = XX, XY = XY, initB = init, ind = ind, lam = lam, crit = crit, 
-        tol = tol, maxit = maxit)
+    LASSO = lassoc(XX = XX, XY = XY, initB = init, 
+        ind = ind, lam = lam, crit = crit, tol = tol, 
+        maxit = maxit)
     
     
     # compute loss
-    loss = sum((Y - X %*% LASSO$Coefficients)^2)/2 + lam*sum(abs(ind*LASSO$Coefficients))
+    loss = sum((Y - X %*% LASSO$Coefficients)^2)/2 + 
+        lam * sum(abs(ind * LASSO$Coefficients))
     
-    returns = list(Call = call, Iterations = LASSO$Iterations, Loss = loss, 
-        Coefficients = LASSO$Coefficients)
+    returns = list(Call = call, Iterations = LASSO$Iterations, 
+        Loss = loss, Coefficients = LASSO$Coefficients)
     return(returns)
     
 }

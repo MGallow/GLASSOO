@@ -4,8 +4,8 @@
 \alias{LASSO}
 \title{Lasso Regression (c++)}
 \usage{
-LASSO(X, Y, lam = 0.1, crit = "loss", tol = 1e-04, maxit = 10000,
-  ind = NULL)
+LASSO(X, Y, lam = 0.1, crit = c("loss", "avg", "max"), tol = 1e-04,
+  maxit = 10000, ind = matrix(1, ncol(X), ncol(Y)))
 }
 \arguments{
 \item{X}{matrix or data frame}
@@ -14,7 +14,7 @@ LASSO(X, Y, lam = 0.1, crit = "loss", tol = 1e-04, maxit = 10000,
 
 \item{lam}{tuning parameter for lasso regularization term. Defaults to 'lam = 0.1'}
 
-\item{crit}{criterion for convergence. Criterion \code{loss} will loop until the change in the objective after an iteration over the parameter set is less than \code{tol}. Criterion \code{max} will loop until the maximum change in the estimate after an iteration over the parameter set is less than \code{tol}. Defaults to \code{max}.}
+\item{crit}{criterion for convergence. Criterion \code{loss} will loop until the change in the objective after an iteration over the parameter set is less than \code{tol}. Criterion \code{sum} will loop until the sum change in the estimate after an interation over the parameter set is less than \code{tol} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum change is less than \code{tol} times tolerance multiple. Defaults to \code{loss}.}
 
 \item{tol}{tolerance for algorithm convergence. Defaults to 1e-4}
 
