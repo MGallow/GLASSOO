@@ -12,7 +12,7 @@
 #' @param X matrix or data frame
 #' @param Y matrix or data frame of response values
 #' @param lam tuning parameter for lasso regularization term. Defaults to 'lam = 0.1'
-#' @param crit criterion for convergence. Criterion \code{loss} will loop until the change in the objective after an iteration over the parameter set is less than \code{tol}. Criterion \code{max} will loop until the maximum change in the estimate after an iteration over the parameter set is less than \code{tol}. Defaults to \code{loss}.
+#' @param crit criterion for convergence. Criterion \code{loss} will loop until the change in the objective after an iteration over the parameter set is less than \code{tol}. Criterion \code{sum} will loop until the sum change in the estimate after an interation over the parameter set is less than \code{tol} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum change is less than \code{tol} times tolerance multiple. Defaults to \code{loss}.
 #' @param tol tolerance for algorithm convergence. Defaults to 1e-4
 #' @param maxit maximum iterations. Defaults to 1e4
 #' @param ind optional matrix specifying which coefficients will be penalized.
@@ -35,26 +35,31 @@
 #' @export
 
 # we define the lasso function
-LASSO = function(X, Y, lam = 0.1, crit = "loss", tol = 1e-04, 
-    maxit = 10000, ind = NULL) {
+LASSO = function(X, Y, lam = 0.1, crit = c("loss", "avg", "max"), tol = 1e-04, 
+    maxit = 10000, ind = matrix(1, ncol(X), ncol(Y))) {
     
     # checks
+    if (is.null(X) || is.null(Y)) {
+      stop("Must provide entry for X and Y!")
+    }
     if (lam <= 0) {
-        stop("lam must be positive!")
+      stop("lam must be positive!")
     }
-    
-    # initialization
-    p = dim(X)[2]
-    r = dim(Y)[2]
-    X = as.matrix(X)
-    Y = as.matrix(Y)
-    if (is.null(ind)) {
-        ind = matrix(1, nrow = p, ncol = r)
+    if (tol <= 0) {
+      stop("Entry must be positive!")
     }
+    if (maxit%%1 != 0) {
+      stop("Entry must be an integer!")
+    }
+  
+    # match values
+    crit = match.arg(crit)
+    lam = sort(lam)
+    call = match.call()
     
     # save values
-    XX = crossprod(X)
-    XY = crossprod(X, Y)
+    XX = crossprod(as.matrix(X))
+    XY = crossprod(as.matrix(X), as.matrix(Y))
     
     # execute lassoc
     init = matrix(0, nrow = ncol(X), ncol = ncol(Y))
@@ -65,7 +70,7 @@ LASSO = function(X, Y, lam = 0.1, crit = "loss", tol = 1e-04,
     # compute loss
     loss = sum((Y - X %*% LASSO$Coefficients)^2)/2 + lam*sum(abs(ind*LASSO$Coefficients))
     
-    returns = list(Iterations = LASSO$Iterations, Loss = loss, 
+    returns = list(Call = call, Iterations = LASSO$Iterations, Loss = loss, 
         Coefficients = LASSO$Coefficients)
     return(returns)
     

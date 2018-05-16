@@ -14,15 +14,15 @@ using namespace Rcpp;
 //' 
 //' @description Computes the coefficient estimates for lasso-penalized linear regression.
 //' 
-//' @details For details on the implementation of 'GLASSO', see the vignette
-//' \url{https://mgallow.github.io/GLASSO/}.
+//' @details For details on the implementation of 'GLASSOO', see the vignette
+//' \url{https://mgallow.github.io/GLASSOO/}.
 //'
 //' @param XX matrix
 //' @param XY matrix
 //' @param initB initialization for beta regression coefficients.
 //' @param ind optional matrix specifying which coefficients will be penalized.
 //' @param lam tuning parameter for lasso regularization term. Defaults to 'lam = 0.1'
-//' @param crit criterion for convergence. Criterion \code{loss} will loop until the change in the objective after an iteration over the parameter set is less than \code{tol}. Criterion \code{max} will loop until the maximum change in the estimate after an iteration over the parameter set is less than \code{tol}. Defaults to \code{loss}.
+//' @param crit criterion for convergence. Criterion \code{loss} will loop until the change in the objective after an iteration over the parameter set is less than \code{tol}. Criterion \code{sum} will loop until the sum change in the estimate after an interation over the parameter set is less than \code{tol} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum change is less than \code{tol} times tolerance multiple. Defaults to \code{loss}.
 //' @param tol tolerance for algorithm convergence. Defaults to 1e-4
 //' @param maxit maximum iterations. Defaults to 1e4
 //' 
@@ -34,9 +34,9 @@ using namespace Rcpp;
 //' @references
 //' \itemize{
 //' \item 
-//' For more information on the ADMM algorithm, see: \cr
-//' Boyd, Stephen, Neal Parikh, Eric Chu, Borja Peleato, Jonathan Eckstein, and others. 2011. 'Distributed Optimization and Statistical Learning via the Alternating Direction Method of Multipliers.' \emph{Foundations and Trends in Machine Learning} 3 (1). Now Publishers, Inc.: 1-122.\cr
-//' \url{https://web.stanford.edu/~boyd/papers/pdf/admm_distr_stats.pdf}
+//' For more information on the coordinate descent algorithm, see: \cr
+//' Friedman, Jerome, et al. "Pathwise coordinate optimization." \emph{The Annals of Applied Statistics} 1.2 (2007): 302-332.\cr
+//' \url{https://arxiv.org/pdf/0708.1485.pdf}
 //' }
 //' 
 //' @author Matt Galloway \email{gall0441@@umn.edu}
@@ -50,24 +50,34 @@ List lassoc(const arma::mat &XX, const arma::mat &XY, const arma::mat &initB, co
   int P = XX.n_cols, R = XY.n_cols, iter;
   double loss, loss2, temp;
   bool criterion = true;
-  arma::mat B, B2, H, H2;
+  arma::mat B, B2, H, H2, maxes;
   H = H2 = arma::zeros<arma::mat>(P, R);
+  maxes = arma::abs(arma::max(XY, 0));
   iter = loss = temp = 0;
   B2 = initB;
   
   // loop until convergence
-  while (criterion && (iter <= maxit)){
+  while (criterion && (iter < maxit)){
 
-    // keep old values
+    // update values
+    iter++;
     B = B2;
     loss = loss2;
     
     // loop over all entries of beta
     for (int r = 0; r < R; r++){
       for (int p = 0; p < P; p++){
+        if (lam > maxes(r)){
+          
+          // set each entry in column r equal to zero if lam > max(XY)
+          B2(p, r) = 0;
+          
+        } else {
         
-        // update betas by soft thresholding
-        B2(p, r) = softc(XY(p, r) - H2(p, r), lam*ind(p, r))/XX(p, p);
+          // otherwise update betas by soft thresholding
+          B2(p, r) = softc(XY(p, r) - H2(p, r), lam*ind(p, r))/XX(p, p);
+          
+        }
         
         // if updated beta is different, update H matrix
         if (B2(p, r) != B(p, r)){
@@ -99,15 +109,19 @@ List lassoc(const arma::mat &XX, const arma::mat &XY, const arma::mat &initB, co
     }
     
     // stopping criterion
-    iter++;
     if (crit == "loss"){
       
       // compute loss improvement
       criterion = (std::abs(loss2 - loss) > tol);
       
+    } else if (crit == "avg") {
+      
+      // compute estimate avg change
+      criterion = (arma::accu(arma::abs(B2 - B)) > tol);
+      
     } else {
       
-      // compute estimate change
+      // compute estimate max change
       criterion = (arma::abs(B2 - B).max() > tol);
       
     }

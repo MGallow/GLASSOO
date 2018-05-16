@@ -1,4 +1,4 @@
-#' @useDynLib GLASSO
+#' @useDynLib GLASSOO
 #' @importFrom Rcpp sourceCpp
 #' @importFrom grDevices colorRampPalette
 #' @importFrom stats cov
