@@ -47,27 +47,30 @@ using namespace Rcpp;
 //'
 // [[Rcpp::export]]
 List lassoc(const arma::mat &XX, const arma::mat &XY, const arma::mat &initB, const arma::mat &ind, const double lam = 0.1, std::string crit = "loss", const double tol = 1e-4, const double maxit = 1e4){
-
+  
   // allocate memory
   int P = XX.n_cols, R = XY.n_cols, iter;
-  double loss, loss2, temp;
+  double temp = 0, loss2 = 0, loss = 0;
   bool criterion = true;
-  arma::mat B, B2, H, H2, maxes;
+  arma::mat B = initB, B2 = initB, H, H2, maxes, mult;
   H = H2 = arma::zeros<arma::mat>(P, R);
   maxes = arma::abs(arma::max(XY, 0));
-  iter = loss = temp = 0;
-  B2 = initB;
+  mult = arma::sum(arma::abs(XY.each_col()/XX.diag()), 0);
   
-  // loop until convergence
-  while (criterion && (iter < maxit)){
-
-    // update values
-    iter++;
-    B = B2;
-    loss = loss2;
+  
+  // loop over all responses
+  for (int r = 0; r < R; r++){
     
-    // loop over all entries of beta
-    for (int r = 0; r < R; r++){
+    // for each response, loop until convergence
+    iter = 0; criterion = true;
+    while (criterion && (iter < maxit)){
+      
+      // update values
+      iter++;
+      B = B2;
+      loss = loss2;
+      
+      // loop over all rows in column r of beta
       for (int p = 0; p < P; p++){
         if (lam > maxes(r)){
           
@@ -75,7 +78,7 @@ List lassoc(const arma::mat &XX, const arma::mat &XY, const arma::mat &initB, co
           B2(p, r) = 0;
           
         } else {
-        
+          
           // otherwise update betas by soft thresholding
           B2(p, r) = softc(XY(p, r) - H2(p, r), lam*ind(p, r))/XX(p, p);
           
@@ -95,48 +98,49 @@ List lassoc(const arma::mat &XX, const arma::mat &XY, const arma::mat &initB, co
               
               // create temporary sum used in loss function, if necessary
               if (crit == "loss"){
-               temp += B2(p_, r)*XX(p_, p);
-               
+                temp += B2(p_, r)*XX(p_, p);
+                
               }
             }
           }
           
           // update loss, if necessary
           if (crit == "loss"){
-           loss2 += (B(p, r) - B2(p, r))*(XY(p, r) - temp) + (std::pow(B2(p, r), 2) - std::pow(B(p, r), 2))*XX(p, p)/2 + lam*ind(p,r)*(std::abs(B2(p, r)) - std::abs(B(p, r)));
+            loss2 += (B(p, r) - B2(p, r))*(XY(p, r) - temp) + (std::pow(B2(p, r), 2) - std::pow(B(p, r), 2))*XX(p, p)/2 + lam*ind(p,r)*(std::abs(B2(p, r)) - std::abs(B(p, r)));
             
           }
         }
       }
-    }
-    
-    // stopping criterion
-    if (crit == "loss"){
       
-      // compute loss improvement
-      criterion = (std::abs(loss2 - loss) > tol);
+      // stopping criterion
+      if (crit == "loss"){
+        
+        // compute loss improvement
+        criterion = (std::abs(loss2 - loss) > tol);
+        
+      } else if (crit == "avg") {
+        
+        // compute estimate avg change
+        criterion = (arma::mean(arma::abs(B2.col(r) - B.col(r))) > tol*mult(r));
+        
+      } else {
+        
+        // compute estimate max change
+        criterion = (arma::abs(B2.col(r) - B.col(r)).max() > tol*mult(r));
+        
+      }
       
-    } else if (crit == "avg") {
+      // R_CheckUserInterrupt
+      if (iter % 1000 == 0){
+        R_CheckUserInterrupt();
+      }
       
-      // compute estimate avg change
-      criterion = (arma::accu(arma::abs(B2 - B)) > tol);
-      
-    } else {
-      
-      // compute estimate max change
-      criterion = (arma::abs(B2 - B).max() > tol);
-      
-    }
-
-    // R_CheckUserInterrupt
-    if (iter % 1000 == 0){
-      R_CheckUserInterrupt();
     }
   }
-
+  
   return List::create(Named("Iterations") = iter,
                       Named("Coefficients") = B2,
                       Named("H") = H2);
-
+  
 }
 
