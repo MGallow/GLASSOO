@@ -51,7 +51,8 @@ List GLASSOc(const arma::mat &S, const arma::mat &initSigma, const double lam, s
   bool criterion = true;
   int P = S.n_cols, iter = 0;
   double mult;
-  arma::mat Sigmatemp, Stemp, Omegatemp(P, 1, arma::fill::zeros), ind(P - 1, 1, arma::fill::ones), Beta(P - 1, 1, arma::fill::zeros), Betas, H, Omega(P, P, arma::fill::eye), Sigma(initSigma), Sigma2(initSigma), Sminus(S);
+  arma::mat Sigmatemp(P - 1, P - 1, arma::fill::zeros), Stemp, Omegatemp(P, 1, arma::fill::zeros), ind(P - 1, 1, arma::fill::ones), Beta, Betas, H, Omega(P, P, arma::fill::eye), Sigma(initSigma), Sigma2(initSigma), Sminus(S);
+  Beta = Stemp = arma::zeros<arma::mat>(P - 1, 1);
   Betas = H = arma::zeros<arma::mat>(P - 1, P);
   Sminus -= arma::diagmat(Sminus);
   mult = arma::accu(arma::abs(Sminus));
@@ -71,11 +72,31 @@ List GLASSOc(const arma::mat &S, const arma::mat &initSigma, const double lam, s
       Beta = Betas.col(p);
       
       // set Sigmatemp = Sigma[-p, -p]
-      Sigmatemp = Sigma2; Sigmatemp.shed_col(p); Sigmatemp.shed_row(p);
+      for (int i = 0; i < (P - 1); i++){
+        for (int j = 0; j < (P - 1); j++){
+          if ((i < p) && (j < p)){
+            Sigmatemp(i, j) = Sigma2(i, j);
+          } else if ((i < p) && (j >= p)){
+            Sigmatemp(i, j) = Sigma2(i, j + 1);
+          } else if ((i >= p) && (j < p)){
+            Sigmatemp(i, j) = Sigma2(i + 1, j);
+          } else {
+            Sigmatemp(i, j) = Sigma2(i + 1, j + 1);
+          }
+        }
+      }
       
-      // initialize H matrix, set Stemp = S[-p, p] used in lassoc
+      // initialize H matrix used in lassoc
       H = Sigmatemp*Beta - Sigmatemp.diag() % Beta;
-      Stemp = S.col(p); Stemp.shed_row(p);
+      
+      // set Stemp = S[-p, p]
+      for (int i = 0; i < (P - 1); i++){
+        if (i < p){
+          Stemp(i, 0) = S(i, p);
+        } else {
+          Stemp(i, 0) = S(i + 1, p);
+        }
+      }
       
       // execute LASSO
       List LASSO = lassoc(Sigmatemp, Stemp, Beta, H, ind, lam, crit_in, tol_in, maxit_in);
@@ -85,18 +106,16 @@ List GLASSOc(const arma::mat &S, const arma::mat &initSigma, const double lam, s
       Stemp = Sigmatemp*Betas.col(p);
       
       // update Sigma[-p, p] = Sigma[p, -p] = Stemp
-      if (p == 0){
-        Sigma2.col(p).tail(P - 1) = Stemp;
-        Sigma2.row(p).tail(P - 1) = Stemp.t();
-      } else if (p == (P - 1)){
-        Sigma2.col(p).head(p) = Stemp;
-        Sigma2.row(p).head(p) = Stemp.t();
-      } else {
-        Sigma2.col(p).head(p) = Stemp.col(0).head(p);
-        Sigma2.col(p).tail(P - p) = Stemp.col(0).tail(P - p);
-        Sigma2.row(p).head(p) = Stemp.col(0).head(p).t();
-        Sigma2.row(p).tail(P - p) = Stemp.col(0).tail(P - p).t();
+      for (int i = 0; i < (P - 1); i++){
+        if (i < p){
+          Sigma2(i, p) = Stemp(i, 0);
+          Sigma2(p, i) = Stemp(i, 0);
+        } else {
+          Sigma2(i + 1, p) = Stemp(i, 0);
+          Sigma2(p, i + 1) = Stemp(i, 0);
+        }
       }
+      
     }
     
     
@@ -119,29 +138,34 @@ List GLASSOc(const arma::mat &S, const arma::mat &initSigma, const double lam, s
     }
   }
   
+  
   // compute Omega from Sigma
   for (int p = 0; p < P; p++){
     
     // update Stemp = Sigma[-p, p]
-    Stemp = Sigma2.col(p); Stemp.shed_row(p);
+    for (int i = 0; i < (P - 1); i++){
+      if (i < p){
+        Stemp(i, 0) = Sigma2(i, p);
+      } else {
+        Stemp(i, 0) = Sigma2(i + 1, p);
+      }
+    }
     
     // update Omega[p, p] and Omegatemp = Omega12
     Omega(p, p) = 1/(Sigma2(p, p) - arma::accu(Stemp % Betas.col(p)));
     Omegatemp = -Omega(p, p)*Betas.col(p);
     
     // set Omega[-p, p] = Omega[p, -p] = Omegatemp
-    if (p == 0){
-      Omega.col(p).tail(P - 1) = Omegatemp;
-      Omega.row(p).tail(P - 1) = Omegatemp.t();
-    } else if (p == (P - 1)){
-      Omega.col(p).head(p) = Omegatemp;
-      Omega.row(p).head(p) = Omegatemp.t();
-    } else {
-      Omega.col(p).head(p) = Omegatemp.col(0).head(p);
-      Omega.col(p).tail(P - p) = Omegatemp.col(0).tail(P - p);
-      Omega.row(p).head(p) = Omegatemp.col(0).head(p).t();
-      Omega.row(p).tail(P - p) = Omegatemp.col(0).tail(P - p).t();
+    for (int i = 0; i < (P - 1); i++){
+      if (i < p){
+        Omega(i, p) = Omegatemp(i, 0);
+        Omega(p, i) = Omegatemp(i, 0);
+      } else {
+        Omega(i + 1, p) = Omegatemp(i, 0);
+        Omega(p, i + 1) = Omegatemp(i, 0);
+      }
     }
+    
   }
   
   return List::create(Named("Iterations") = iter,

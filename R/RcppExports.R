@@ -79,3 +79,11 @@ lassoc <- function(XX, XY, initB, initH, ind, lam = 0.1, crit = "loss", tol = 1e
     .Call('_GLASSOO_lassoc', PACKAGE = 'GLASSOO', XX, XY, initB, initH, ind, lam, crit, tol, maxit)
 }
 
+reduce <- function(X, p) {
+    .Call('_GLASSOO_reduce', PACKAGE = 'GLASSOO', X, p)
+}
+
+reduce2 <- function(X, p) {
+    .Call('_GLASSOO_reduce2', PACKAGE = 'GLASSOO', X, p)
+}
+

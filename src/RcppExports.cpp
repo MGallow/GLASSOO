@@ -44,10 +44,36 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// reduce
+List reduce(arma::mat X, int p);
+RcppExport SEXP _GLASSOO_reduce(SEXP XSEXP, SEXP pSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    rcpp_result_gen = Rcpp::wrap(reduce(X, p));
+    return rcpp_result_gen;
+END_RCPP
+}
+// reduce2
+List reduce2(arma::mat X, int p);
+RcppExport SEXP _GLASSOO_reduce2(SEXP XSEXP, SEXP pSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    rcpp_result_gen = Rcpp::wrap(reduce2(X, p));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_GLASSOO_GLASSOc", (DL_FUNC) &_GLASSOO_GLASSOc, 9},
     {"_GLASSOO_lassoc", (DL_FUNC) &_GLASSOO_lassoc, 9},
+    {"_GLASSOO_reduce", (DL_FUNC) &_GLASSOO_reduce, 2},
+    {"_GLASSOO_reduce2", (DL_FUNC) &_GLASSOO_reduce2, 2},
     {NULL, NULL, 0}
 };
 
