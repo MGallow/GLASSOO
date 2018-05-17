@@ -45,7 +45,7 @@ For details on the implementation of 'GLASSOO', see the vignette
 \itemize{
 \item 
 For more information on the graphical lasso algorithm, see: \cr
-Friedman, Jerome, Trevor Hastie, and Robert Tibshirani. 'Sparse inverse covariance estimation with the graphical lasso.' \emph{Biostatistics} 9.3 (2008): 432-441.\cr
+Friedman, Jerome, Trevor Hastie, and Robert Tibshirani. "Sparse inverse covariance estimation with the graphical lasso." \emph{Biostatistics} 9.3 (2008): 432-441.\cr
 \url{http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf}
 }
 }

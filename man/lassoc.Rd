@@ -41,7 +41,7 @@ For details on the implementation of 'GLASSOO', see the vignette
 \itemize{
 \item 
 For more information on the coordinate descent algorithm, see: \cr
-Friedman, Jerome, et al. 'Pathwise coordinate optimization.' \emph{The Annals of Applied Statistics} 1.2 (2007): 302-332.\cr
+Friedman, Jerome, et al. "Pathwise coordinate optimization." \emph{The Annals of Applied Statistics} 1.2 (2007): 302-332.\cr
 \url{https://arxiv.org/pdf/0708.1485.pdf}
 }
 }
