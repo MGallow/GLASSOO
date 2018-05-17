@@ -17,19 +17,19 @@ using namespace Rcpp;
 //' @details For details on the implementation of 'GLASSOO', see the vignette
 //' \url{https://mgallow.github.io/GLASSOO/}.
 //'
-//' @param XX matrix
-//' @param XY matrix
+//' @param XX crossproduct of nxp data matrix.
+//' @param XY crossproduc of nxp data matrix and nxr matrix of response values.
 //' @param initB initialization for beta regression coefficients.
 //' @param ind optional matrix specifying which coefficients will be penalized.
-//' @param lam tuning parameter for lasso regularization term. Defaults to 'lam = 0.1'
-//' @param crit criterion for convergence. Criterion \code{loss} will loop until the change in the objective after an iteration over the parameter set is less than \code{tol}. Criterion \code{sum} will loop until the sum change in the estimate after an interation over the parameter set is less than \code{tol} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum change is less than \code{tol} times tolerance multiple. Defaults to \code{loss}.
-//' @param tol tolerance for algorithm convergence. Defaults to 1e-4
-//' @param maxit maximum iterations. Defaults to 1e4
+//' @param lam tuning parameter for lasso regularization term. Defaults to \code{lam = 0.1}.
+//' @param crit criterion for convergence. Criterion \code{loss} will loop until the change in the objective for each response after an iteration is less than \code{tol}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol} times tolerance multiple. Defaults to \code{loss}.
+//' @param tol tolerance for algorithm convergence. Defaults to 1e-4.
+//' @param maxit maximum iterations. Defaults to 1e4.
 //' 
 //' @return returns list of returns which includes:
 //' \item{Iterations}{number of iterations.}
 //' \item{Coefficients}{estimated regression coefficients.}
-//' \item{H}{update H matrix.}
+//' \item{H}{H matrix}
 //' 
 //' @references
 //' \itemize{
@@ -46,14 +46,13 @@ using namespace Rcpp;
 //' @export
 //'
 // [[Rcpp::export]]
-List lassoc(const arma::mat &XX, const arma::mat &XY, const arma::mat &initB, const arma::mat &ind, const double lam = 0.1, std::string crit = "loss", const double tol = 1e-4, const double maxit = 1e4){
+List lassoc(const arma::mat &XX, const arma::mat &XY, const arma::mat &initB, const arma::mat &initH, const arma::mat &ind, const double lam = 0.1, std::string crit = "loss", const double tol = 1e-4, const double maxit = 1e4){
   
   // allocate memory
   int P = XX.n_cols, R = XY.n_cols, iter;
   double temp = 0, loss2 = 0, loss = 0;
   bool criterion = true;
-  arma::mat B = initB, B2 = initB, H, H2, maxes, mult;
-  H = H2 = arma::zeros<arma::mat>(P, R);
+  arma::mat B(initB), B2(initB), H(initH), H2(initH), maxes, mult;
   maxes = arma::abs(arma::max(XY, 0));
   mult = arma::sum(arma::abs(XY.each_col()/XX.diag()), 0);
   

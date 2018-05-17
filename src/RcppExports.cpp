@@ -6,27 +6,48 @@
 
 using namespace Rcpp;
 
+// GLASSOc
+List GLASSOc(const arma::mat& S, const arma::mat& initSigma, const double lam, std::string crit_out, std::string crit_in, const double tol_out, const double tol_in, const int maxit_out, const int maxit_in);
+RcppExport SEXP _GLASSOO_GLASSOc(SEXP SSEXP, SEXP initSigmaSEXP, SEXP lamSEXP, SEXP crit_outSEXP, SEXP crit_inSEXP, SEXP tol_outSEXP, SEXP tol_inSEXP, SEXP maxit_outSEXP, SEXP maxit_inSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type initSigma(initSigmaSEXP);
+    Rcpp::traits::input_parameter< const double >::type lam(lamSEXP);
+    Rcpp::traits::input_parameter< std::string >::type crit_out(crit_outSEXP);
+    Rcpp::traits::input_parameter< std::string >::type crit_in(crit_inSEXP);
+    Rcpp::traits::input_parameter< const double >::type tol_out(tol_outSEXP);
+    Rcpp::traits::input_parameter< const double >::type tol_in(tol_inSEXP);
+    Rcpp::traits::input_parameter< const int >::type maxit_out(maxit_outSEXP);
+    Rcpp::traits::input_parameter< const int >::type maxit_in(maxit_inSEXP);
+    rcpp_result_gen = Rcpp::wrap(GLASSOc(S, initSigma, lam, crit_out, crit_in, tol_out, tol_in, maxit_out, maxit_in));
+    return rcpp_result_gen;
+END_RCPP
+}
 // lassoc
-List lassoc(const arma::mat& XX, const arma::mat& XY, const arma::mat& initB, const arma::mat& ind, const double lam, std::string crit, const double tol, const double maxit);
-RcppExport SEXP _GLASSOO_lassoc(SEXP XXSEXP, SEXP XYSEXP, SEXP initBSEXP, SEXP indSEXP, SEXP lamSEXP, SEXP critSEXP, SEXP tolSEXP, SEXP maxitSEXP) {
+List lassoc(const arma::mat& XX, const arma::mat& XY, const arma::mat& initB, const arma::mat& initH, const arma::mat& ind, const double lam, std::string crit, const double tol, const double maxit);
+RcppExport SEXP _GLASSOO_lassoc(SEXP XXSEXP, SEXP XYSEXP, SEXP initBSEXP, SEXP initHSEXP, SEXP indSEXP, SEXP lamSEXP, SEXP critSEXP, SEXP tolSEXP, SEXP maxitSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type XX(XXSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type XY(XYSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type initB(initBSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type initH(initHSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type ind(indSEXP);
     Rcpp::traits::input_parameter< const double >::type lam(lamSEXP);
     Rcpp::traits::input_parameter< std::string >::type crit(critSEXP);
     Rcpp::traits::input_parameter< const double >::type tol(tolSEXP);
     Rcpp::traits::input_parameter< const double >::type maxit(maxitSEXP);
-    rcpp_result_gen = Rcpp::wrap(lassoc(XX, XY, initB, ind, lam, crit, tol, maxit));
+    rcpp_result_gen = Rcpp::wrap(lassoc(XX, XY, initB, initH, ind, lam, crit, tol, maxit));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_GLASSOO_lassoc", (DL_FUNC) &_GLASSOO_lassoc, 8},
+    {"_GLASSOO_GLASSOc", (DL_FUNC) &_GLASSOO_GLASSOc, 9},
+    {"_GLASSOO_lassoc", (DL_FUNC) &_GLASSOO_lassoc, 9},
     {NULL, NULL, 0}
 };
 

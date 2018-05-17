@@ -9,15 +9,16 @@
 #' @details For details on the implementation of 'GLASSO', see the vignette
 #' \url{https:#mgallow.github.io/GLASSO/}.
 #'
-#' @param X matrix or data frame
-#' @param Y matrix or data frame of response values
-#' @param lam tuning parameter for lasso regularization term. Defaults to 'lam = 0.1'
-#' @param crit criterion for convergence. Criterion \code{loss} will loop until the change in the objective after an iteration over the parameter set is less than \code{tol}. Criterion \code{sum} will loop until the sum change in the estimate after an interation over the parameter set is less than \code{tol} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum change is less than \code{tol} times tolerance multiple. Defaults to \code{loss}.
-#' @param tol tolerance for algorithm convergence. Defaults to 1e-4
+#' @param X nxp data matrix.
+#' @param Y nxr matrix of response values
+#' @param lam tuning parameter for lasso regularization term. Defaults to \code{lam = 0.1}.
+#' @param crit criterion for convergence. Criterion \code{loss} will loop until the change in the objective for each response after an iteration is less than \code{tol}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol} times tolerance multiple. Defaults to \code{loss}.
+#' @param tol tolerance for algorithm convergence. Defaults to 1e-4..
 #' @param maxit maximum iterations. Defaults to 1e4
 #' @param ind optional matrix specifying which coefficients will be penalized.
 #' 
 #' @return returns list of returns which includes:
+#' \item{Call}{function call.}
 #' \item{Iterations}{number of iterations.}
 #' \item{Loss}{value of the objective function.}
 #' \item{Coefficients}{estimated regression coefficients.}
@@ -25,19 +26,22 @@
 #' @references
 #' \itemize{
 #' \item 
-#' For more information on the ADMM algorithm, see: \cr
-#' Boyd, Stephen, Neal Parikh, Eric Chu, Borja Peleato, Jonathan Eckstein, and others. 2011. 'Distributed Optimization and Statistical Learning via the Alternating Direction Method of Multipliers.' \emph{Foundations and Trends in Machine Learning} 3 (1). Now Publishers, Inc.: 1-122.\cr
-#' \url{https:#web.stanford.edu/~boyd/papers/pdf/admm_distr_stats.pdf}
+#' For more information on the coordinate descent algorithm, see: \cr
+#' Friedman, Jerome, et al. 'Pathwise coordinate optimization.' \emph{The Annals of
+#' Applied Statistics} 1.2 (2007): 302-332.\cr
+#' \url{https://arxiv.org/pdf/0708.1485.pdf}
 #' }
 #' 
 #' @author Matt Galloway \email{gall0441@@umn.edu}
 #' 
+#' @keywords internal
+#' 
 #' @export
 
 # we define the lasso function
-LASSO = function(X, Y, lam = 0.1, crit = c("loss", "avg", 
-    "max"), tol = 1e-04, maxit = 10000, ind = matrix(1, ncol(X), 
-    ncol(Y))) {
+LASSO = function(X, Y, lam = 0.1, crit = c("loss", 
+    "avg", "max"), tol = 1e-04, maxit = 10000, ind = matrix(1, 
+    ncol(X), ncol(Y))) {
     
     # checks
     if (is.null(X) || is.null(Y)) {
@@ -66,13 +70,14 @@ LASSO = function(X, Y, lam = 0.1, crit = c("loss", "avg",
     
     # execute lassoc
     init = matrix(0, nrow = ncol(X), ncol = ncol(Y))
-    LASSO = lassoc(XX = XX, XY = XY, initB = init, ind = ind, 
-        lam = lam, crit = crit, tol = tol, maxit = maxit)
+    LASSO = lassoc(XX = XX, XY = XY, initB = init, 
+        initH = init, ind = ind, lam = lam, crit = crit, 
+        tol = tol, maxit = maxit)
     
     
     # compute loss
-    loss = sum((Y - X %*% LASSO$Coefficients)^2)/2 + lam * 
-        sum(abs(ind * LASSO$Coefficients))
+    loss = sum((Y - X %*% LASSO$Coefficients)^2)/2 + 
+        lam * sum(abs(ind * LASSO$Coefficients))
     
     returns = list(Call = call, Iterations = LASSO$Iterations, 
         Loss = loss, Coefficients = LASSO$Coefficients)

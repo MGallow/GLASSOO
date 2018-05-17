@@ -8,15 +8,15 @@ LASSO(X, Y, lam = 0.1, crit = c("loss", "avg", "max"), tol = 1e-04,
   maxit = 10000, ind = matrix(1, ncol(X), ncol(Y)))
 }
 \arguments{
-\item{X}{matrix or data frame}
+\item{X}{nxp data matrix.}
 
-\item{Y}{matrix or data frame of response values}
+\item{Y}{nxr matrix of response values}
 
-\item{lam}{tuning parameter for lasso regularization term. Defaults to 'lam = 0.1'}
+\item{lam}{tuning parameter for lasso regularization term. Defaults to \code{lam = 0.1}.}
 
-\item{crit}{criterion for convergence. Criterion \code{loss} will loop until the change in the objective after an iteration over the parameter set is less than \code{tol}. Criterion \code{sum} will loop until the sum change in the estimate after an interation over the parameter set is less than \code{tol} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum change is less than \code{tol} times tolerance multiple. Defaults to \code{loss}.}
+\item{crit}{criterion for convergence. Criterion \code{loss} will loop until the change in the objective for each response after an iteration is less than \code{tol}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol} times tolerance multiple. Defaults to \code{loss}.}
 
-\item{tol}{tolerance for algorithm convergence. Defaults to 1e-4}
+\item{tol}{tolerance for algorithm convergence. Defaults to 1e-4..}
 
 \item{maxit}{maximum iterations. Defaults to 1e4}
 
@@ -24,6 +24,7 @@ LASSO(X, Y, lam = 0.1, crit = c("loss", "avg", "max"), tol = 1e-04,
 }
 \value{
 returns list of returns which includes:
+\item{Call}{function call.}
 \item{Iterations}{number of iterations.}
 \item{Loss}{value of the objective function.}
 \item{Coefficients}{estimated regression coefficients.}
@@ -38,11 +39,13 @@ For details on the implementation of 'GLASSO', see the vignette
 \references{
 \itemize{
 \item 
-For more information on the ADMM algorithm, see: \cr
-Boyd, Stephen, Neal Parikh, Eric Chu, Borja Peleato, Jonathan Eckstein, and others. 2011. 'Distributed Optimization and Statistical Learning via the Alternating Direction Method of Multipliers.' \emph{Foundations and Trends in Machine Learning} 3 (1). Now Publishers, Inc.: 1-122.\cr
-\url{https:#web.stanford.edu/~boyd/papers/pdf/admm_distr_stats.pdf}
+For more information on the coordinate descent algorithm, see: \cr
+Friedman, Jerome, et al. 'Pathwise coordinate optimization.' \emph{The Annals of
+Applied Statistics} 1.2 (2007): 302-332.\cr
+\url{https://arxiv.org/pdf/0708.1485.pdf}
 }
 }
 \author{
 Matt Galloway \email{gall0441@umn.edu}
 }
+\keyword{internal}
