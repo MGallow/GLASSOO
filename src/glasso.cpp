@@ -123,10 +123,10 @@ List GLASSOc(const arma::mat &S, const arma::mat &initSigma, const double lam, s
   for (int p = 0; p < P; p++){
     
     // update Stemp = Sigma[-p, p]
-    Stemp = Sigma.col(p); Stemp.shed_row(p);
+    Stemp = Sigma2.col(p); Stemp.shed_row(p);
     
     // update Omega[p, p] and Omegatemp = Omega12
-    Omega(p, p) = 1/(Sigma(p, p) - arma::accu(Stemp % Betas.col(p)));
+    Omega(p, p) = 1/(Sigma2(p, p) - arma::accu(Stemp % Betas.col(p)));
     Omegatemp = -Omega(p, p)*Betas.col(p);
     
     // set Omega[-p, p] = Omega[p, -p] = Omegatemp
