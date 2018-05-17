@@ -92,9 +92,9 @@ List GLASSOc(const arma::mat &S, const arma::mat &initSigma, const double lam, s
       // set Stemp = S[-p, p]
       for (int i = 0; i < (P - 1); i++){
         if (i < p){
-          Stemp(i, 1) = S(i, p);
+          Stemp(i, 0) = S(i, p);
         } else {
-          Stemp(i, 1) = S(i + 1, p);
+          Stemp(i, 0) = S(i + 1, p);
         }
       }
       
@@ -108,11 +108,11 @@ List GLASSOc(const arma::mat &S, const arma::mat &initSigma, const double lam, s
       // update Sigma[-p, p] = Sigma[p, -p] = Stemp
       for (int i = 0; i < (P - 1); i++){
         if (i < p){
-          Sigma2(i, p) = Stemp(i, 1);
-          Sigma2(p, i) = Stemp(i, 1);
+          Sigma2(i, p) = Stemp(i, 0);
+          Sigma2(p, i) = Stemp(i, 0);
         } else {
-          Sigma2(i + 1, p) = Stemp(i, 1);
-          Sigma2(p, i + 1) = Stemp(i, 1);
+          Sigma2(i + 1, p) = Stemp(i, 0);
+          Sigma2(p, i + 1) = Stemp(i, 0);
         }
       }
       
@@ -145,24 +145,24 @@ List GLASSOc(const arma::mat &S, const arma::mat &initSigma, const double lam, s
     // update Stemp = Sigma[-p, p]
     for (int i = 0; i < (P - 1); i++){
       if (i < p){
-        Stemp(i, 1) = Sigma2(i, p);
+        Stemp(i, 0) = Sigma2(i, p);
       } else {
-        Stemp(i, 1) = Sigma2(i + 1, p);
+        Stemp(i, 0) = Sigma2(i + 1, p);
       }
     }
     
     // update Omega[p, p] and Omegatemp = Omega12
-    Omega(p, p) = 1/(Sigma(p, p) - arma::accu(Stemp % Betas.col(p)));
+    Omega(p, p) = 1/(Sigma2(p, p) - arma::accu(Stemp % Betas.col(p)));
     Omegatemp = -Omega(p, p)*Betas.col(p);
     
     // set Omega[-p, p] = Omega[p, -p] = Omegatemp
     for (int i = 0; i < (P - 1); i++){
       if (i < p){
-        Omega(i, p) = Omegatemp(i, 1);
-        Omega(p, i) = Omegatemp(i, 1);
+        Omega(i, p) = Omegatemp(i, 0);
+        Omega(p, i) = Omegatemp(i, 0);
       } else {
-        Omega(i + 1, p) = Omegatemp(i, 1);
-        Omega(p, i + 1) = Omegatemp(i, 1);
+        Omega(i + 1, p) = Omegatemp(i, 0);
+        Omega(p, i + 1) = Omegatemp(i, 0);
       }
     }
     
