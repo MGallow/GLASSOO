@@ -31,14 +31,23 @@ using namespace Rcpp;
 //' @keywords internal
 //'
 // [[Rcpp::export]]
-arma::mat CVP_ADMMc(const arma::mat &S_train, const arma::mat &S_valid, const arma::colvec &lam, std::string crit_out = "avg", std::string crit_in = "loss", const double tol_out = 1e-4, const double tol_in = 1e-4, int maxit_out = 1e4, int maxit_in = 1e4, int adjmaxit_out = 1e4, std::string start = "warm", std::string trace = "progress") {
+arma::mat CVP_GLASSOc(const arma::mat &S_train, const arma::mat &S_valid, const arma::colvec &lam, std::string crit_out = "avg", std::string crit_in = "loss", const double tol_out = 1e-4, const double tol_in = 1e-4, int maxit_out = 1e4, int maxit_in = 1e4, int adjmaxit_out = 1e4, std::string start = "warm", std::string trace = "progress") {
   
   // initialization
   int p = S_train.n_rows, l = lam.n_rows;
-  double sgn = 0, logdet = 0, lam_;
-  arma::mat Omega, Sigma, initSigma(p, p, arma::fill::zeros), CV_error(l, 1, arma::fill::zeros);
+  double sgn = 0, logdet = 0, lam_, alpha;
+  arma::mat Omega, Sigma, initSigma(S_train), CV_error(l, 1, arma::fill::zeros);
   Progress progress(l, trace == "progress");
   
+  
+  // initial sigma
+  initSigma -=arma::diagmat(initSigma); initSigma = arma::abs(initSigma);
+  alpha = lam[0]/initSigma.max();
+  if (alpha >= 1){
+    alpha = 1;
+  }
+  initSigma = (1 - alpha)*initSigma;
+  initSigma.diag() = S_train.diag();
   
   // loop over all tuning parameters
   for (int i = 0; i < l; i++){

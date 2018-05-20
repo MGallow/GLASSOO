@@ -30,9 +30,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// CVP_ADMMc
-arma::mat CVP_ADMMc(const arma::mat& S_train, const arma::mat& S_valid, const arma::colvec& lam, std::string crit_out, std::string crit_in, const double tol_out, const double tol_in, int maxit_out, int maxit_in, int adjmaxit_out, std::string start, std::string trace);
-RcppExport SEXP _GLASSOO_CVP_ADMMc(SEXP S_trainSEXP, SEXP S_validSEXP, SEXP lamSEXP, SEXP crit_outSEXP, SEXP crit_inSEXP, SEXP tol_outSEXP, SEXP tol_inSEXP, SEXP maxit_outSEXP, SEXP maxit_inSEXP, SEXP adjmaxit_outSEXP, SEXP startSEXP, SEXP traceSEXP) {
+// CVP_GLASSOc
+arma::mat CVP_GLASSOc(const arma::mat& S_train, const arma::mat& S_valid, const arma::colvec& lam, std::string crit_out, std::string crit_in, const double tol_out, const double tol_in, int maxit_out, int maxit_in, int adjmaxit_out, std::string start, std::string trace);
+RcppExport SEXP _GLASSOO_CVP_GLASSOc(SEXP S_trainSEXP, SEXP S_validSEXP, SEXP lamSEXP, SEXP crit_outSEXP, SEXP crit_inSEXP, SEXP tol_outSEXP, SEXP tol_inSEXP, SEXP maxit_outSEXP, SEXP maxit_inSEXP, SEXP adjmaxit_outSEXP, SEXP startSEXP, SEXP traceSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -48,7 +48,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type adjmaxit_out(adjmaxit_outSEXP);
     Rcpp::traits::input_parameter< std::string >::type start(startSEXP);
     Rcpp::traits::input_parameter< std::string >::type trace(traceSEXP);
-    rcpp_result_gen = Rcpp::wrap(CVP_ADMMc(S_train, S_valid, lam, crit_out, crit_in, tol_out, tol_in, maxit_out, maxit_in, adjmaxit_out, start, trace));
+    rcpp_result_gen = Rcpp::wrap(CVP_GLASSOc(S_train, S_valid, lam, crit_out, crit_in, tol_out, tol_in, maxit_out, maxit_in, adjmaxit_out, start, trace));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -93,7 +93,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_GLASSOO_CV_GLASSOc", (DL_FUNC) &_GLASSOO_CV_GLASSOc, 14},
-    {"_GLASSOO_CVP_ADMMc", (DL_FUNC) &_GLASSOO_CVP_ADMMc, 12},
+    {"_GLASSOO_CVP_GLASSOc", (DL_FUNC) &_GLASSOO_CVP_GLASSOc, 12},
     {"_GLASSOO_GLASSOc", (DL_FUNC) &_GLASSOO_GLASSOc, 9},
     {"_GLASSOO_lassoc", (DL_FUNC) &_GLASSOO_lassoc, 9},
     {NULL, NULL, 0}

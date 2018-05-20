@@ -72,18 +72,25 @@ List CV_GLASSOc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam,
   
   // initialization
   int n, p = S.n_cols, l = lam.n_rows, initmaxit = maxit_out;
-  double sgn = 0, logdet = 0, lam_;
-  arma::mat X_train, X_test, S_train(S), S_test(S);
-  arma::mat Omega, Sigma, initSigma, CV_errors(l, K, arma::fill::zeros), zeros(p, p, arma::fill::zeros);
+  double sgn = 0, logdet = 0, lam_, alpha;
+  arma::mat X_train, X_test, S_train(S), S_test(S), initSigma(S);
+  arma::mat Omega, Sigma, CV_errors(l, K, arma::fill::zeros);
   arma::colvec AVG_error, CV_error, zerosl(l, arma::fill::zeros); arma::rowvec X_bar;
   arma::uvec index, index_; arma::vec folds; arma::cube Path;
   Progress progress(l*K, trace == "progress");
   
+  
   // no need to create folds if K = 1
   if (K == 1){
     
-    // set training and testing equal to sample
-    S_train = S_test = S;
+    // initial sigma
+    initSigma -=arma::diagmat(initSigma); initSigma = arma::abs(initSigma);
+    alpha = lam[0]/initSigma.max();
+    if (alpha >= 1){
+      alpha = 1;
+    }
+    initSigma = (1 - alpha)*initSigma;
+    initSigma.diag() = S.diag();
     
     // initialize Path, if necessary
     if (path){
@@ -102,7 +109,7 @@ List CV_GLASSOc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam,
   for (int k = 0; k < K; k++){
     
     // re-initialize values for each fold
-    CV_error = zerosl; initSigma = zeros; maxit_out = initmaxit;
+    CV_error = zerosl; maxit_out = initmaxit;
     
     if (K > 1) {
       
@@ -122,6 +129,16 @@ List CV_GLASSOc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam,
       // sample covariances
       S_train = arma::cov(X_train, 1);
       S_test = arma::cov(X_test, 1);
+      
+      // initial sigma
+      initSigma = S_train;
+      initSigma -=arma::diagmat(initSigma); initSigma = arma::abs(initSigma);
+      alpha = lam[0]/initSigma.max();
+      if (alpha >= 1){
+        alpha = 1;
+      }
+      initSigma = (1 - alpha)*initSigma;
+      initSigma.diag() = S_train.diag();
       
     }
     

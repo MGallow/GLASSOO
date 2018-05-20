@@ -60,8 +60,8 @@ CV_GLASSOc <- function(X, S, lam, path = FALSE, crit_out = "avg", crit_in = "los
 #' 
 #' @keywords internal
 #'
-CVP_ADMMc <- function(S_train, S_valid, lam, crit_out = "avg", crit_in = "loss", tol_out = 1e-4, tol_in = 1e-4, maxit_out = 1e4L, maxit_in = 1e4L, adjmaxit_out = 1e4L, start = "warm", trace = "progress") {
-    .Call('_GLASSOO_CVP_ADMMc', PACKAGE = 'GLASSOO', S_train, S_valid, lam, crit_out, crit_in, tol_out, tol_in, maxit_out, maxit_in, adjmaxit_out, start, trace)
+CVP_GLASSOc <- function(S_train, S_valid, lam, crit_out = "avg", crit_in = "loss", tol_out = 1e-4, tol_in = 1e-4, maxit_out = 1e4L, maxit_in = 1e4L, adjmaxit_out = 1e4L, start = "warm", trace = "progress") {
+    .Call('_GLASSOO_CVP_GLASSOc', PACKAGE = 'GLASSOO', S_train, S_valid, lam, crit_out, crit_in, tol_out, tol_in, maxit_out, maxit_in, adjmaxit_out, start, trace)
 }
 
 #' @title Penalized precision matrix estimation (c++)

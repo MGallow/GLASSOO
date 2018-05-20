@@ -67,14 +67,14 @@
 #' @export
 #' 
 #' @examples
-#' # generate data from a tridiagonal precision matrix
-#' # first compute covariance matrix (can confirm inverse is tridiagonal)
+#' # generate data from a sparse matrix
+#' # first compute covariance matrix
 #' S = matrix(0.7, nrow = 5, ncol = 5)
 #' for (i in 1:5){
 #'  for (j in 1:5){
-#'    S[i, j] = 0.7^abs(i - j)
+#'    S[i, j] = S[i, j]^abs(i - j)
 #'  }
-#' }
+#'  }
 #'
 #' # generate 100 x 5 matrix with rows drawn from iid N_p(0, S)
 #' Z = matrix(rnorm(100*5), nrow = 100, ncol = 5)
@@ -83,20 +83,15 @@
 #' S.sqrt = S.sqrt %*% t(out$vectors)
 #' X = Z %*% S.sqrt
 #'
-#' # lasso penalty (lam = 0.1)
-#' GLASSO(X, lam = 0.1)
-#'
-#' # produce CV heat map for GLASSO
-#' plot(GLASSO(X))
+#' # lasso penalty CV
+#' GLASSO(X)
 
-# we define the GLASSO precision matrix estimation
-# function
-GLASSO = function(X = NULL, S = NULL, lam = 0.1, diagonal = FALSE, 
+# we define the GLASSO precision matrix estimation function
+GLASSO = function(X = NULL, S = NULL, lam = 10^seq(-2, 5, 0.5), diagonal = FALSE, 
     path = FALSE, crit.out = c("avg", "max"), crit.in = c("loss", 
         "avg", "max"), tol.out = 1e-04, tol.in = 1e-04, maxit.out = 10000, 
     maxit.in = 10000, adjmaxit.out = NULL, K = 5, start = c("warm", 
-        "cold"), cores = 1, trace = c("progress", "print", 
-        "none")) {
+        "cold"), cores = 1, trace = c("progress", "print", "none")) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -120,12 +115,16 @@ GLASSO = function(X = NULL, S = NULL, lam = 0.1, diagonal = FALSE,
         print("Parallelization not possible when producing solution path. Setting cores = 1...")
         cores = 1
     }
+    K = ifelse(path, 1, K)
+    if (cores > K) {
+        print("Number of cores exceeds K... setting cores = K")
+        cores = K
+    }
     if (is.null(adjmaxit.out)) {
         adjmaxit.out = maxit.out
     }
     
     # match values
-    K = ifelse(path, 1, K)
     crit.out = match.arg(crit.out)
     crit.in = match.arg(crit.in)
     start = match.arg(start)
@@ -153,11 +152,10 @@ GLASSO = function(X = NULL, S = NULL, lam = 0.1, diagonal = FALSE,
         if (cores > 1) {
             
             # execute CVP_GLASSO
-            GLASSO = CVP_GLASSO(X = X, lam = lam, diagonal = diagonal, 
-                crit_out = crit.out, crit_in = crit.in, tol_out = tol.out, 
-                tol_in = tol.in, maxit_out = maxit.out, maxit_in = maxit.in, 
-                adjmaxit_out = adjmaxit.out, K = K, start = start, 
-                cores = cores, trace = trace)
+            GLASSO = CVP_GLASSO(X = X, lam = lam, crit.out = crit.out, 
+                crit.in = crit.in, tol.out = tol.out, tol.in = tol.in, 
+                maxit.out = maxit.out, maxit.in = maxit.in, adjmaxit.out = adjmaxit.out, 
+                K = K, start = start, cores = cores, trace = trace)
             MIN.error = GLASSO$min.error
             AVG.error = GLASSO$avg.error
             CV.error = GLASSO$cv.error
@@ -168,16 +166,21 @@ GLASSO = function(X = NULL, S = NULL, lam = 0.1, diagonal = FALSE,
             if (is.null(X)) {
                 X = matrix(0)
             }
-            ADMM = CV_GLASSOc(X = X, S = S, lam = lam, alpha = alpha, 
-                path = path, crit_out = crit.out, crit_in = crit.in, 
-                tol_out = tol.out, tol_in = tol.in, maxit_out = maxit.out, 
-                maxit_in = maxit.in, adjmaxit_out = adjmaxit.out, 
-                K = K, start = start, trace = trace)
+            GLASSO = CV_GLASSOc(X = X, S = S, lam = lam, path = path, 
+                crit_out = crit.out, crit_in = crit.in, tol_out = tol.out, 
+                tol_in = tol.in, maxit_out = maxit.out, maxit_in = maxit.in, 
+                adjmaxit_out = adjmaxit.out, K = K, start = start, 
+                trace = trace)
             MIN.error = GLASSO$min.error
             AVG.error = GLASSO$avg.error
             CV.error = GLASSO$cv.error
             Path = GLASSO$path
             
+        }
+        
+        # print warning if lam on boundary
+        if ((GLASSO$lam == GLASSO$lam[1]) || GLASSO$lam == GLASSO$lam[length(GLASSO$lam)]) {
+            print("Optimal tuning parameter on boundary...!")
         }
         
         # compute final estimate at best tuning parameters
@@ -193,9 +196,9 @@ GLASSO = function(X = NULL, S = NULL, lam = 0.1, diagonal = FALSE,
             stop("Must set specify X, set path = TRUE, or provide single value for lam.")
         }
         
-        GLASSO = GLASSOc(S = S, initSigma = init, lam = lam, 
-            crit_out = crit.out, crit_in = crit.in, tol_out = tol.out, 
-            tol_in = tol.in, maxit_out = maxit.out, maxit_in = maxit.in)
+        GLASSO = GLASSOc(S = S, initSigma = init, lam = lam, crit_out = crit.out, 
+            crit_in = crit.in, tol_out = tol.out, tol_in = tol.in, 
+            maxit_out = maxit.out, maxit_in = maxit.in)
         
     }
     
@@ -210,22 +213,21 @@ GLASSO = function(X = NULL, S = NULL, lam = 0.1, diagonal = FALSE,
     # compute penalized loglik
     n = ifelse(is.null(X), nrow(S), nrow(X))
     loglik = (-n/2) * (sum(GLASSO$Omega * S) - determinant(GLASSO$Omega, 
-        logarithm = TRUE)$modulus[1] + GLASSO$lam * sum(abs(C * 
-        GLASSO$Omega)))
+        logarithm = TRUE)$modulus[1] + GLASSO$lam * sum(abs(C * GLASSO$Omega)))
     
     
     # return values
-    tuning = matrix(c(log10(lam), lam), ncol = 2)
-    colnames(tuning) = c("log10(lam)", "alpha")
+    tuning = matrix(c(log10(GLASSO$lam), GLASSO$lam), ncol = 2)
+    colnames(tuning) = c("log10(lam)", "lam")
     if (!path) {
         Path = NULL
     }
     
-    returns = list(Call = call, Iterations = GLASSO$Iterations, 
-        Tuning = tuning, Lambdas = GLASSO$lam, maxit.out = maxit.out, 
-        maxit.in = maxit.in, Omega = GLASSO$Omega, Sigma = GLASSO$Sigma, 
-        Path = Path, Loglik = loglik, MIN.error = MIN.error, 
-        AVG.error = AVG.error, CV.error = CV.error)
+    returns = list(Call = call, Iterations = GLASSO$Iterations, Tuning = tuning, 
+        Lambdas = lam, maxit.out = maxit.out, maxit.in = maxit.in, 
+        Omega = GLASSO$Omega, Sigma = GLASSO$Sigma, Path = Path, 
+        Loglik = loglik, MIN.error = MIN.error, AVG.error = AVG.error, 
+        CV.error = CV.error)
     
     class(returns) = "GLASSO"
     return(returns)
@@ -263,7 +265,7 @@ print.GLASSO = function(x, ...) {
     print.default(x$Iterations, quote = FALSE)
     
     # print optimal tuning parameters
-    cat("\nTuning parameters:\n")
+    cat("\nTuning parameter:\n")
     print.default(round(x$Tuning, 3), print.gap = 2L, quote = FALSE)
     
     # print loglik
@@ -295,10 +297,14 @@ print.GLASSO = function(x, ...) {
 #' @param ... additional arguments.
 #' @export
 #' @examples
-#' # generate data from a dense matrix
+#' # generate data from a sparse matrix
 #' # first compute covariance matrix
-#' S = matrix(0.9, nrow = 5, ncol = 5)
-#' diag(S) = 1
+#' S = matrix(0.7, nrow = 5, ncol = 5)
+#' for (i in 1:5){
+#'  for (j in 1:5){
+#'    S[i, j] = S[i, j]^abs(i - j)
+#'  }
+#'  }
 #'
 #' # generate 100 x 5 matrix with rows drawn from iid N_p(0, S)
 #' Z = matrix(rnorm(100*5), nrow = 100, ncol = 5)
@@ -306,9 +312,12 @@ print.GLASSO = function(x, ...) {
 #' S.sqrt = out$vectors %*% diag(out$values^0.5)
 #' S.sqrt = S.sqrt %*% t(out$vectors)
 #' X = Z %*% S.sqrt
-#'
-#' # produce CV heat map for RIDGEsigma
-#' plot(GLASSO(X, lam = 10^seq(-8, 8, 0.01)))
+#' 
+#' # produce CV heat map for GLASSO
+#' plot(GLASSO(X))
+#' 
+#' # produce line graph for GLASSO
+#' plot(GLASSO(X), type = 'line')
 
 plot.GLASSO = function(x, type = c("heatmap", "line"), footnote = TRUE, 
     ...) {
@@ -323,22 +332,20 @@ plot.GLASSO = function(x, type = c("heatmap", "line"), footnote = TRUE,
     if (type == "line") {
         
         # gather values to plot
-        cv = cbind(expand.grid(lam = x$Lambdas, alpha = 0), 
-            Errors = as.data.frame.table(x$CV.error)$Freq)
+        cv = cbind(expand.grid(lam = x$Lambdas, alpha = 0), Errors = as.data.frame.table(x$CV.error)$Freq)
         
         # produce line graph
         graph = ggplot(summarise(group_by(cv, lam), Means = mean(Errors)), 
-            aes(log10(lam), Means)) + geom_jitter(width = 0.2, 
-            color = "navy blue") + theme_minimal() + geom_line(color = "red") + 
-            labs(title = "Cross-Validation Errors", y = "Error")
+            aes(log10(lam), Means)) + geom_jitter(width = 0.2, color = "navy blue") + 
+            theme_minimal() + geom_line(color = "red") + labs(title = "Cross-Validation Errors", 
+            y = "Error")
         
     } else {
         
         # augment values for heat map (helps visually)
         lam = x$Lambdas
         cv = expand.grid(lam = lam, alpha = 0)
-        Errors = 1/(c(x$AVG.error) + abs(min(x$AVG.error)) + 
-            1)
+        Errors = 1/(c(x$AVG.error) + abs(min(x$AVG.error)) + 1)
         cv = cbind(cv, Errors)
         
         # design color palette

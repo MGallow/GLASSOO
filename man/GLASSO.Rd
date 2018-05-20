@@ -4,11 +4,11 @@
 \alias{GLASSO}
 \title{Penalized precision matrix estimation via ADMM}
 \usage{
-GLASSO(X = NULL, S = NULL, lam = 0.1, diagonal = FALSE, path = FALSE,
-  crit.out = c("avg", "max"), crit.in = c("loss", "avg", "max"),
-  tol.out = 1e-04, tol.in = 1e-04, maxit.out = 10000, maxit.in = 10000,
-  adjmaxit.out = NULL, K = 5, start = c("warm", "cold"), cores = 1,
-  trace = c("progress", "print", "none"))
+GLASSO(X = NULL, S = NULL, lam = 10^seq(-2, 5, 0.5), diagonal = FALSE,
+  path = FALSE, crit.out = c("avg", "max"), crit.in = c("loss", "avg",
+  "max"), tol.out = 1e-04, tol.in = 1e-04, maxit.out = 10000,
+  maxit.in = 10000, adjmaxit.out = NULL, K = 5, start = c("warm",
+  "cold"), cores = 1, trace = c("progress", "print", "none"))
 }
 \arguments{
 \item{X}{option to provide a nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
@@ -79,14 +79,14 @@ For details on the implementation of 'GLASSOO', see the vignette
 \url{https://mgallow.github.io/GLASSOO/}.
 }
 \examples{
-# generate data from a tridiagonal precision matrix
-# first compute covariance matrix (can confirm inverse is tridiagonal)
+# generate data from a sparse matrix
+# first compute covariance matrix
 S = matrix(0.7, nrow = 5, ncol = 5)
 for (i in 1:5){
  for (j in 1:5){
-   S[i, j] = 0.7^abs(i - j)
+   S[i, j] = S[i, j]^abs(i - j)
  }
-}
+ }
 
 # generate 100 x 5 matrix with rows drawn from iid N_p(0, S)
 Z = matrix(rnorm(100*5), nrow = 100, ncol = 5)
@@ -95,11 +95,8 @@ S.sqrt = out$vectors \%*\% diag(out$values^0.5)
 S.sqrt = S.sqrt \%*\% t(out$vectors)
 X = Z \%*\% S.sqrt
 
-# lasso penalty (lam = 0.1)
-GLASSO(X, lam = 0.1)
-
-# produce CV heat map for GLASSO
-plot(GLASSO(X))
+# lasso penalty CV
+GLASSO(X)
 }
 \references{
 \itemize{

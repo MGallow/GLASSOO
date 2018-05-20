@@ -39,9 +39,8 @@
 #' @export
 
 # we define the lasso function
-LASSO = function(X, Y, lam = 0.1, crit = c("loss", "avg", 
-    "max"), tol = 1e-04, maxit = 10000, ind = matrix(1, ncol(X), 
-    ncol(Y))) {
+LASSO = function(X, Y, lam = 0.1, crit = c("loss", "avg", "max"), 
+    tol = 1e-04, maxit = 10000, ind = matrix(1, ncol(X), ncol(Y))) {
     
     # checks
     if (is.null(X) || is.null(Y)) {
@@ -75,11 +74,11 @@ LASSO = function(X, Y, lam = 0.1, crit = c("loss", "avg",
     
     
     # compute loss
-    loss = sum((Y - X %*% LASSO$Coefficients)^2)/2 + lam * 
-        sum(abs(ind * LASSO$Coefficients))
+    loss = sum((Y - X %*% LASSO$Coefficients)^2)/2 + lam * sum(abs(ind * 
+        LASSO$Coefficients))
     
-    returns = list(Call = call, Iterations = LASSO$Iterations, 
-        Loss = loss, Coefficients = LASSO$Coefficients)
+    returns = list(Call = call, Iterations = LASSO$Iterations, Loss = loss, 
+        Coefficients = LASSO$Coefficients)
     return(returns)
     
 }

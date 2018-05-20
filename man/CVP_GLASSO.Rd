@@ -4,18 +4,16 @@
 \alias{CVP_GLASSO}
 \title{Parallel CV (uses CV_GLASSOc)}
 \usage{
-CVP_GLASSO(X = NULL, lam = 10^seq(-5, 5, 0.5), diagonal = FALSE,
-  crit.out = c("avg", "max"), crit.in = c("loss", "avg", "max"),
-  tol.out = 1e-04, tol.in = 1e-04, maxit.out = 10000, maxit.in = 10000,
-  adjmaxit.out = NULL, K = 5, start = c("warm", "cold"), cores = 1,
-  trace = c("progress", "print", "none"))
+CVP_GLASSO(X = NULL, lam = 10^seq(-5, 5, 0.5), crit.out = c("avg", "max"),
+  crit.in = c("loss", "avg", "max"), tol.out = 1e-04, tol.in = 1e-04,
+  maxit.out = 10000, maxit.in = 10000, adjmaxit.out = NULL, K = 5,
+  start = c("warm", "cold"), cores = 1, trace = c("progress", "print",
+  "none"))
 }
 \arguments{
 \item{X}{nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
 
 \item{lam}{positive tuning parameters for elastic net penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.}
-
-\item{diagonal}{option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.}
 
 \item{crit.out}{criterion for convergence in outer (blockwise) loop. Criterion \code{avg} will loop until the average absolute parameter change is less than \code{tol.out} times tolerance multiple. Criterion \code{max} will loop until the maximum change in the estimated Sigma after an iteration over the parameter set is less than \code{tol.out}. Defaults to \code{avg}.}
 

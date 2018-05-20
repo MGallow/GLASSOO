@@ -6,7 +6,6 @@
 #'
 #' @param X nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.
 #' @param lam positive tuning parameters for elastic net penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
-#' @param diagonal option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.
 #' @param crit.out criterion for convergence in outer (blockwise) loop. Criterion \code{avg} will loop until the average absolute parameter change is less than \code{tol.out} times tolerance multiple. Criterion \code{max} will loop until the maximum change in the estimated Sigma after an iteration over the parameter set is less than \code{tol.out}. Defaults to \code{avg}.
 #' @param crit.in criterion for convergence in inner (lasso) loop. Criterion for convergence. Criterion \code{loss} will loop until the change in the objective for each response after an iteration is less than \code{tol.in}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol.in} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol.in} times tolerance multiple. Defaults to \code{loss}.
 #' @param tol.out convergence tolerance for outer (blockwise) loop. Defaults to 1e-4.
@@ -28,11 +27,10 @@
 #' @keywords internal
 
 # we define the CV_GLASSOc function
-CVP_GLASSO = function(X = NULL, lam = 10^seq(-5, 5, 0.5), 
-    diagonal = FALSE, crit.out = c("avg", "max"), crit.in = c("loss", 
-        "avg", "max"), tol.out = 1e-04, tol.in = 1e-04, maxit.out = 10000, 
-    maxit.in = 10000, adjmaxit.out = NULL, K = 5, start = c("warm", 
-        "cold"), cores = 1, trace = c("progress", "print", 
+CVP_GLASSO = function(X = NULL, lam = 10^seq(-5, 5, 0.5), crit.out = c("avg", 
+    "max"), crit.in = c("loss", "avg", "max"), tol.out = 1e-04, tol.in = 1e-04, 
+    maxit.out = 10000, maxit.in = 10000, adjmaxit.out = NULL, K = 5, 
+    start = c("warm", "cold"), cores = 1, trace = c("progress", "print", 
         "none")) {
     
     # match values
@@ -45,8 +43,7 @@ CVP_GLASSO = function(X = NULL, lam = 10^seq(-5, 5, 0.5),
     # make cluster and register cluster
     num_cores = detectCores()
     if (cores > num_cores) {
-        print(paste("Only detected", num_cores, "cores...", 
-            sep = " "))
+        print(paste("Only detected", num_cores, "cores...", sep = " "))
     }
     if (cores > K) {
         print("Number of cores exceeds K... setting cores = K")
@@ -60,11 +57,10 @@ CVP_GLASSO = function(X = NULL, lam = 10^seq(-5, 5, 0.5),
     n = dim(X)[1]
     ind = sample(n)
     k = NULL
-    CV = foreach(k = 1:K, .packages = "GLASSO", .combine = "cbind", 
+    CV = foreach(k = 1:K, .packages = "GLASSOO", .combine = "cbind", 
         .inorder = FALSE) %dopar% {
         
-        leave.out = ind[(1 + floor((k - 1) * n/K)):floor(k * 
-            n/K)]
+        leave.out = ind[(1 + floor((k - 1) * n/K)):floor(k * n/K)]
         
         # training set
         X.train = X[-leave.out, , drop = FALSE]
@@ -80,11 +76,10 @@ CVP_GLASSO = function(X = NULL, lam = 10^seq(-5, 5, 0.5),
         S.valid = crossprod(X.valid)/(dim(X.valid)[1])
         
         # run foreach loop on CVP_ADMMc
-        CVP_GLASSOc(S_train = S.train, S_valid = S.valid, 
-            lam = lam, diagonal = diagonal, crit_out = crit.out, 
-            crit_in = crit.in, tol_out = tol.out, tol_in = tol.in, 
-            maxit_out = maxit.out, maxit_in = maxit.in, adjmaxit_out = adjmaxit.out, 
-            start = start, trace = trace)
+        CVP_GLASSOc(S_train = S.train, S_valid = S.valid, lam = lam, 
+            crit_out = crit.out, crit_in = crit.in, tol_out = tol.out, 
+            tol_in = tol.in, maxit_out = maxit.out, maxit_in = maxit.in, 
+            adjmaxit_out = adjmaxit.out, start = start, trace = trace)
         
     }
     
