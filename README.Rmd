@@ -9,7 +9,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-See [manual](https://github.com/MGallow/GLASSO/blob/master/GLASSO.pdf).
+See [manual](https://github.com/MGallow/GLASSO/blob/master/GLASSOO.pdf).
 
 ## Overview
 
@@ -68,8 +68,8 @@ Sample = (nrow(X) - 1)/nrow(X)*cov(X)
 # print sample precision matrix (perhaps a bad estimate)
 (qr.solve(cov(X)) %>% round(5))
 
-# GLASSO (lam = 10^(-1))
-GLASSO(S = Sample, lam = 10^(-1))
+# GLASSO (lam = 0.5)
+GLASSO(S = Sample, lam = 0.5)
 
 # GLASSO cross validation
 GLASSO(X, lam = 10^seq(-5, 5, 0.5))
