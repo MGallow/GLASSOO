@@ -1,7 +1,7 @@
 ## Matt Galloway
 
 
-#' @title Penalized precision matrix estimation via ADMM
+#' @title Penalized precision matrix estimation
 #' 
 #' @description Penalized precision matrix estimation using the graphical lasso (glasso) algorithm.
 #' Consider the case where \eqn{X_{1}, ..., X_{n}} are iid \eqn{N_{p}(\mu,
@@ -179,7 +179,8 @@ GLASSO = function(X = NULL, S = NULL, lam = 10^seq(-2, 5, 0.5), diagonal = FALSE
         }
         
         # print warning if lam on boundary
-        if ((GLASSO$lam == GLASSO$lam[1]) || GLASSO$lam == GLASSO$lam[length(GLASSO$lam)]) {
+        if ((GLASSO$lam == lam[1]) || (GLASSO$lam == lam[length(lam)]) && 
+            (length(lam) != 1)) {
             print("Optimal tuning parameter on boundary...!")
         }
         
@@ -364,7 +365,7 @@ plot.GLASSO = function(x, type = c("heatmap", "line"), footnote = TRUE,
         
         # produce with footnote
         graph + labs(caption = paste("**Optimal: log10(lam) = ", 
-            x$Lambda[1], sep = ""))
+            round(x$Tuning[1], 3), sep = ""))
         
     } else {
         

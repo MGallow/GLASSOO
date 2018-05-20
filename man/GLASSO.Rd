@@ -2,7 +2,7 @@
 % Please edit documentation in R/glasso.R
 \name{GLASSO}
 \alias{GLASSO}
-\title{Penalized precision matrix estimation via ADMM}
+\title{Penalized precision matrix estimation}
 \usage{
 GLASSO(X = NULL, S = NULL, lam = 10^seq(-2, 5, 0.5), diagonal = FALSE,
   path = FALSE, crit.out = c("avg", "max"), crit.in = c("loss", "avg",
