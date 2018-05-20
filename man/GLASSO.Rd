@@ -4,9 +4,11 @@
 \alias{GLASSO}
 \title{Penalized precision matrix estimation via ADMM}
 \usage{
-GLASSO(X = NULL, S = NULL, lam = 0.1, diagonal = FALSE,
-  crit.out = c("avg", "max"), crit.in = c("loss", "avg", "max"),
-  tol.out = 1e-04, tol.in = 1e-04, maxit.out = 10000, maxit.in = 10000)
+GLASSO(X = NULL, S = NULL, lam = 10^seq(-2, 5, 0.5), diagonal = FALSE,
+  path = FALSE, crit.out = c("avg", "max"), crit.in = c("loss", "avg",
+  "max"), tol.out = 1e-04, tol.in = 1e-04, maxit.out = 10000,
+  maxit.in = 10000, adjmaxit.out = NULL, K = 5, start = c("warm",
+  "cold"), cores = 1, trace = c("progress", "print", "none"))
 }
 \arguments{
 \item{X}{option to provide a nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
@@ -16,6 +18,8 @@ GLASSO(X = NULL, S = NULL, lam = 0.1, diagonal = FALSE,
 \item{lam}{tuning parameter for elastic net penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.}
 
 \item{diagonal}{option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.}
+
+\item{path}{option to return the regularization path. This option should be used with extreme care if the dimension is large. If set to TRUE, cores must be set to 1 and errors and optimal tuning parameters will based on the full sample. Defaults to FALSE.}
 
 \item{crit.out}{criterion for convergence in outer (blockwise) loop. Criterion \code{avg} will loop until the average absolute parameter change is less than \code{tol.out} times tolerance multiple. Criterion \code{max} will loop until the maximum change in the estimated Sigma after an iteration over the parameter set is less than \code{tol.out}. Defaults to \code{avg}.}
 
@@ -28,17 +32,32 @@ GLASSO(X = NULL, S = NULL, lam = 0.1, diagonal = FALSE,
 \item{maxit.out}{maximum number of iterations for outer (blockwise) loop. Defaults to 1e4.}
 
 \item{maxit.in}{maximum number of iterations for inner (lasso) loop. Defaults to 1e4.}
+
+\item{adjmaxit.out}{adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for 'one-step' estimators. Defaults to NULL.}
+
+\item{K}{specify the number of folds for cross validation.}
+
+\item{start}{specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.}
+
+\item{cores}{option to run CV in parallel. Defaults to \code{cores = 1}.}
+
+\item{trace}{option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.}
 }
 \value{
 returns class object \code{ADMMsigma} which includes:
 \item{Call}{function call.}
 \item{Iterations}{number of iterations}
+\item{Tuning}{optimal tuning parameters (lam and alpha).}
 \item{Lambdas}{grid of lambda values for CV.}
 \item{maxit.out}{maximum number of iterations for outer (blockwise) loop.}
 \item{maxit.in}{maximum number of iterations for inner (lasso) loop.}
 \item{Omega}{estimated penalized precision matrix.}
 \item{Sigma}{estimated covariance matrix from the penalized precision matrix (inverse of Omega).}
+\item{Path}{array containing the solution path. Solutions will be ordered by ascending lambda values.}
 \item{Loglik}{penalized log-likelihood for Omega}
+\item{MIN.error}{minimum average cross validation error for optimal parameters.}
+\item{AVG.error}{average cross validation error across all folds.}
+\item{CV.error}{cross validation errors (negative validation likelihood).}
 }
 \description{
 Penalized precision matrix estimation using the graphical lasso (glasso) algorithm.
@@ -60,14 +79,14 @@ For details on the implementation of 'GLASSOO', see the vignette
 \url{https://mgallow.github.io/GLASSOO/}.
 }
 \examples{
-# generate data from a tridiagonal precision matrix
-# first compute covariance matrix (can confirm inverse is tridiagonal)
+# generate data from a sparse matrix
+# first compute covariance matrix
 S = matrix(0.7, nrow = 5, ncol = 5)
 for (i in 1:5){
  for (j in 1:5){
-   S[i, j] = 0.7^abs(i - j)
+   S[i, j] = S[i, j]^abs(i - j)
  }
-}
+ }
 
 # generate 100 x 5 matrix with rows drawn from iid N_p(0, S)
 Z = matrix(rnorm(100*5), nrow = 100, ncol = 5)
@@ -76,11 +95,8 @@ S.sqrt = out$vectors \%*\% diag(out$values^0.5)
 S.sqrt = S.sqrt \%*\% t(out$vectors)
 X = Z \%*\% S.sqrt
 
-# lasso penalty (lam = 0.1)
-GLASSO(X, lam = 0.1)
-
-# produce CV heat map for GLASSO
-plot(GLASSO(X))
+# lasso penalty CV
+GLASSO(X)
 }
 \references{
 \itemize{

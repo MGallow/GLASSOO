@@ -2,13 +2,13 @@ Package: GLASSOO
 Type: Package
 Title: Lasso Penalized Precision Matrix Estimation
 Version: 1.0
-Date: 2018-04-16
+Date: 2018-05-17
 Authors@R: person("Matt", "Galloway", email = "gall0441@umn.edu",
                   role = c("aut", "cre"))
-Description: Estimates a penalized precision matrix via the alternating direction method of multipliers (ADMM) algorithm. It currently supports a general elastic-net penalty that allows for both ridge and lasso-type penalties as special cases. This package is an alternative to the 'glasso' package.
-    See Boyd et al (2010) <doi:10.1561/2200000016> for details regarding the estimation method.
-URL: https://github.com/MGallow/ADMMsigma
-BugReports: https://github.com/MGallow/ADMMsigma/issues
+Description: Estimates a lasso penalized precision matrix via the blockwise coordinate descent algorithm (BCD) algorithm. This package is an alternative to the 'glasso' package.
+    See Friedman et al (2008) <doi:10.1093/biostatistics/kxm045> for details regarding the estimation method.
+URL: https://github.com/MGallow/GLASSOO
+BugReports: https://github.com/MGallow/GLASSOO/issues
 License: GPL (>= 2)
 ByteCompile: TRUE
 NeedsCompilation: yes
@@ -18,10 +18,13 @@ RoxygenNote: 6.0.1
 Imports: stats,
     parallel,
     foreach,
-    ggplot2
+    ggplot2,
+    dplyr
 Depends: Rcpp (>= 0.12.10),
+    RcppProgress (>= 0.1),
     doParallel
 LinkingTo: Rcpp,
-    RcppArmadillo
+    RcppArmadillo,
+    RcppProgress
 Suggests: testthat
 SystemRequirements: GNU make

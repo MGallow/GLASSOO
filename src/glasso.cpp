@@ -3,6 +3,7 @@
 #include <RcppArmadillo.h>
 #include <Rcpp.h>
 #include "lasso.h"
+#include "misc.h"
 
 using namespace Rcpp;
 
@@ -72,31 +73,13 @@ List GLASSOc(const arma::mat &S, const arma::mat &initSigma, const double lam, s
       Beta = Betas.col(p);
       
       // set Sigmatemp = Sigma[-p, -p]
-      for (int i = 0; i < (P - 1); i++){
-        for (int j = 0; j < (P - 1); j++){
-          if ((i < p) && (j < p)){
-            Sigmatemp(i, j) = Sigma2(i, j);
-          } else if ((i < p) && (j >= p)){
-            Sigmatemp(i, j) = Sigma2(i, j + 1);
-          } else if ((i >= p) && (j < p)){
-            Sigmatemp(i, j) = Sigma2(i + 1, j);
-          } else {
-            Sigmatemp(i, j) = Sigma2(i + 1, j + 1);
-          }
-        }
-      }
+      reducec(Sigma2, Sigmatemp, p);
       
       // initialize H matrix used in lassoc
       H = Sigmatemp*Beta - Sigmatemp.diag() % Beta;
       
       // set Stemp = S[-p, p]
-      for (int i = 0; i < (P - 1); i++){
-        if (i < p){
-          Stemp(i, 0) = S(i, p);
-        } else {
-          Stemp(i, 0) = S(i + 1, p);
-        }
-      }
+      extractc(S, Stemp, p);
       
       // execute LASSO
       List LASSO = lassoc(Sigmatemp, Stemp, Beta, H, ind, lam, crit_in, tol_in, maxit_in);
@@ -106,15 +89,7 @@ List GLASSOc(const arma::mat &S, const arma::mat &initSigma, const double lam, s
       Stemp = Sigmatemp*Betas.col(p);
       
       // update Sigma[-p, p] = Sigma[p, -p] = Stemp
-      for (int i = 0; i < (P - 1); i++){
-        if (i < p){
-          Sigma2(i, p) = Stemp(i, 0);
-          Sigma2(p, i) = Stemp(i, 0);
-        } else {
-          Sigma2(i + 1, p) = Stemp(i, 0);
-          Sigma2(p, i + 1) = Stemp(i, 0);
-        }
-      }
+      updatec(Sigma2, Stemp, p);
       
     }
     
@@ -143,28 +118,14 @@ List GLASSOc(const arma::mat &S, const arma::mat &initSigma, const double lam, s
   for (int p = 0; p < P; p++){
     
     // update Stemp = Sigma[-p, p]
-    for (int i = 0; i < (P - 1); i++){
-      if (i < p){
-        Stemp(i, 0) = Sigma2(i, p);
-      } else {
-        Stemp(i, 0) = Sigma2(i + 1, p);
-      }
-    }
+    extractc(Sigma, Stemp, p);
     
     // update Omega[p, p] and Omegatemp = Omega12
     Omega(p, p) = 1/(Sigma2(p, p) - arma::accu(Stemp % Betas.col(p)));
     Omegatemp = -Omega(p, p)*Betas.col(p);
     
     // set Omega[-p, p] = Omega[p, -p] = Omegatemp
-    for (int i = 0; i < (P - 1); i++){
-      if (i < p){
-        Omega(i, p) = Omegatemp(i, 0);
-        Omega(p, i) = Omegatemp(i, 0);
-      } else {
-        Omega(i + 1, p) = Omegatemp(i, 0);
-        Omega(p, i + 1) = Omegatemp(i, 0);
-      }
-    }
+    updatec(Omega, Omegatemp, p);
     
   }
   
