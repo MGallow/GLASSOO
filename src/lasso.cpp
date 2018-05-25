@@ -22,7 +22,7 @@ using namespace Rcpp;
 //' @param initB initialization for beta regression coefficients.
 //' @param ind optional matrix specifying which coefficients will be penalized.
 //' @param lam tuning parameter for lasso regularization term. Defaults to \code{lam = 0.1}.
-//' @param crit criterion for convergence. Criterion \code{loss} will loop until the change in the objective for each response after an iteration is less than \code{tol}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol} times tolerance multiple. Defaults to \code{loss}.
+//' @param crit criterion for convergence. Criterion \code{loss} will loop until the relative change in the objective for each response after an iteration is less than \code{tol}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol} times tolerance multiple. Defaults to \code{loss}.
 //' @param tol tolerance for algorithm convergence. Defaults to 1e-4.
 //' @param maxit maximum iterations. Defaults to 1e4.
 //' 
@@ -33,10 +33,12 @@ using namespace Rcpp;
 //' 
 //' @references
 //' \itemize{
-//' \item 
-//' For more information on the coordinate descent algorithm, see: \cr
-//' Friedman, Jerome, et al. "Pathwise coordinate optimization." \emph{The Annals of Applied Statistics} 1.2 (2007): 302-332.\cr
-//' \url{https://arxiv.org/pdf/0708.1485.pdf}
+//' \item Friedman, Jerome, et al. "Pathwise coordinate optimization." \emph{The Annals of Applied Statistics} 1.2 (2007): 302-332. \url{https://arxiv.org/pdf/0708.1485.pdf}
+//' \item Tibshirani, Robert. 1996. "Regression Shrinkage and Selection via the Lasso." \emph{Journal of the Royal Statistical Society. Series B (Methodological)}. JSTOR: 267-288.
+//' \item Tibshirani, Robert, Bien, Jacob, Friedman, Jerome, Hastie, Trevor, Simon, Noah, Jonathan, Taylor, and Tibshirani, Ryan J. "Strong Rules for Discarding Predictors in Lasso-Type Problems." \emph{Journal of the Royal Statistical Society: Series B (Statistical Methodology)}. Wiley Online Library 74 (2): 245-266.
+//' \item Ghaoui, Laurent El, Viallon, Vivian, and Rabbani, Tarek. 2010. "Safe Feature Elimination for the Lasso and Sparse Supervised Learning Problems." \emph{arXiv preprint arXiv: 1009.4219}.
+//' \item Osborne, Michael R, Presnell, Brett, and Turlach, Berwin A. "On the Lasso and its Dual." \emph{Journal of Computational and Graphical Statistics}. Taylor and Francis 9 (2): 319-337.
+
 //' }
 //' 
 //' @author Matt Galloway \email{gall0441@@umn.edu}
@@ -115,7 +117,7 @@ List lassoc(const arma::mat &XX, const arma::mat &XY, const arma::mat &initB, co
       if (crit == "loss"){
         
         // compute loss improvement
-        criterion = (std::abs(loss2 - loss) > tol);
+        criterion = (std::abs((loss2 - loss)/loss) > tol);
         
       } else if (crit == "avg") {
         

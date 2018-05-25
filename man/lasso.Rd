@@ -14,7 +14,7 @@ LASSO(X, Y, lam = 0.1, crit = c("loss", "avg", "max"), tol = 1e-04,
 
 \item{lam}{tuning parameter for lasso regularization term. Defaults to \code{lam = 0.1}.}
 
-\item{crit}{criterion for convergence. Criterion \code{loss} will loop until the change in the objective for each response after an iteration is less than \code{tol}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol} times tolerance multiple. Defaults to \code{loss}.}
+\item{crit}{criterion for convergence. Criterion \code{loss} will loop until the relative change in the objective for each response after an iteration is less than \code{tol}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol} times tolerance multiple. Defaults to \code{loss}.}
 
 \item{tol}{tolerance for algorithm convergence. Defaults to 1e-4..}
 

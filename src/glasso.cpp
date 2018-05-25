@@ -21,7 +21,7 @@ using namespace Rcpp;
 //' @param initSigma initialization matrix for estimated covariance matrix Sigma
 //' @param lam tuning parameter for lasso penalty.
 //' @param crit_out criterion for convergence in outer (blockwise) loop. Criterion \code{avg} will loop until the average absolute parameter change is less than \code{tol_out} times tolerance multiple. Criterion \code{max} will loop until the maximum change in the estimated Sigma after an iteration over the parameter set is less than \code{tol_out}. Defaults to \code{avg}.
-//' @param crit_in criterion for convergence in inner (lasso) loop. Criterion for convergence. Criterion \code{loss} will loop until the change in the objective for each response after an iteration is less than \code{tol_in}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol_in} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol_in} times tolerance multiple. Defaults to \code{loss}.
+//' @param crit_in criterion for convergence in inner (lasso) loop. Criterion for convergence. Criterion \code{loss} will loop until the relative change in the objective for each response after an iteration is less than \code{tol_in}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol_in} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol_in} times tolerance multiple. Defaults to \code{loss}.
 //' @param tol_out convergence tolerance for outer (blockwise) loop. Defaults to 1e-4.
 //' @param tol_in convergence tolerance for inner (lasso) loop. Defaults to 1e-4.
 //' @param maxit_out maximum number of iterations for outer (blockwise) loop. Defaults to 1e4.
@@ -35,14 +35,21 @@ using namespace Rcpp;
 //' 
 //' @references
 //' \itemize{
-//' \item 
-//' For more information on the graphical lasso algorithm, see: \cr
-//' Friedman, Jerome, Trevor Hastie, and Robert Tibshirani. "Sparse inverse covariance estimation with the graphical lasso." \emph{Biostatistics} 9.3 (2008): 432-441.\cr
-//' \url{http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf}
+//' \item Friedman, Jerome, Trevor Hastie, and Robert Tibshirani. 'Sparse inverse covariance estimation with the graphical lasso.' \emph{Biostatistics} 9.3 (2008): 432-441.
+//' \item Banerjee, Onureen, Ghauoui, Laurent El, and d'Aspremont, Alexandre. 2008. "Model Selection through Sparse Maximum Likelihood Estimation for Multivariate Gaussian or Binary Data." \emph{Journal of Machine Learning Research} 9: 485-516.
+//' \item Tibshirani, Robert. 1996. "Regression Shrinkage and Selection via the Lasso." \emph{Journal of the Royal Statistical Society. Series B (Methodological)}. JSTOR: 267-288.
+//' \item Meinshausen, Nicolai and Buhlmann, Peter. 2006. "High-Dimensional Graphs and Variable Selection with the Lasso." \emph{The Annals of Statistics}. JSTOR: 1436-1462.
+//' \item Witten, Daniela M, Friedman, Jerome H, and Simon, Noah. 2011. "New Insights and Faster computations for the Graphical Lasso." \emph{Journal of Computation and Graphical Statistics}. Taylor and Francis: 892-900.
+//' \item Tibshirani, Robert, Bien, Jacob, Friedman, Jerome, Hastie, Trevor, Simon, Noah, Jonathan, Taylor, and Tibshirani, Ryan J. "Strong Rules for Discarding Predictors in Lasso-Type Problems." \emph{Journal of the Royal Statistical Society: Series B (Statistical Methodology)}. Wiley Online Library 74 (2): 245-266.
+//' \item Ghaoui, Laurent El, Viallon, Vivian, and Rabbani, Tarek. 2010. "Safe Feature Elimination for the Lasso and Sparse Supervised Learning Problems." \emph{arXiv preprint arXiv: 1009.4219}.
+//' \item Osborne, Michael R, Presnell, Brett, and Turlach, Berwin A. "On the Lasso and its Dual." \emph{Journal of Computational and Graphical Statistics}. Taylor and Francis 9 (2): 319-337.
+//' \item Rothman, Adam. 2017. "STAT 8931 notes on an algorithm to compute the Lasso-penalized Gausssian likelihood precision matrix estimator." 
 //' }
 //' 
 //' @author Matt Galloway \email{gall0441@@umn.edu}
 //' 
+//' @export
+//'
 //' @keywords internal
 //'
 // [[Rcpp::export]]
@@ -75,7 +82,7 @@ List GLASSOc(const arma::mat &S, const arma::mat &initSigma, const double lam, s
       // set Sigmatemp = Sigma[-p, -p]
       reducec(Sigma2, Sigmatemp, p);
       
-      // initialize H matrix used in lassoc
+      // initialize H matrix used in lassoc (Sigmatemp.minus*Beta)
       H = Sigmatemp*Beta - Sigmatemp.diag() % Beta;
       
       // set Stemp = S[-p, p]

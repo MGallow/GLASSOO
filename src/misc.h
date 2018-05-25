@@ -11,5 +11,6 @@ void extractc(const arma::mat &X, arma::mat &Y, const int &p);
 
 void updatec(arma::mat &X, const arma::mat &Y, const int &p);
 
+int numzeros(arma::mat &X);
 
 #endif

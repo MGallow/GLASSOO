@@ -100,3 +100,33 @@ void updatec(arma::mat &X, const arma::mat &Y, const int &p) {
   }
   
 }
+
+
+
+
+
+////-----------------------------------------------------
+
+
+
+//' @title Nonzeros (c++)
+//' @description This function counts the number of nonzero elements in a matrix
+//' @param X matrix
+//' @keywords internal
+//'
+
+int numzeros(arma::mat &X) {
+  
+  // loop over all elements of X and count nonzeros
+  int num = 0;
+  arma::mat::iterator it = X.begin();
+  arma::mat::iterator it_end = X.end();
+  
+  for (; it != it_end; ++it){
+    if (*it != 0){
+      num++;
+    }
+  }
+  
+  return(num);
+}

@@ -4,23 +4,25 @@
 \alias{CV_GLASSOc}
 \title{CV penalized precision matrix estimation (c++)}
 \usage{
-CV_GLASSOc(X, S, lam, path = FALSE, crit_out = "avg", crit_in = "loss",
-  tol_out = 1e-04, tol_in = 1e-04, maxit_out = 10000L,
-  maxit_in = 10000L, adjmaxit_out = 10000L, K = 5L, start = "warm",
-  trace = "progress")
+CV_GLASSOc(X, S, lam, diagonal = FALSE, path = FALSE, crit_out = "avg",
+  crit_in = "loss", tol_out = 1e-04, tol_in = 1e-04, maxit_out = 10000L,
+  maxit_in = 10000L, adjmaxit_out = 10000L, K = 5L, crit_cv = "loglik",
+  start = "warm", trace = "progress")
 }
 \arguments{
 \item{X}{option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
 
 \item{S}{option to provide a pxp sample covariance matrix (denominator n). If argument is \code{NULL} and \code{X} is provided instead then \code{S} will be computed automatically.}
 
-\item{lam}{positive tuning parameters for elastic net penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.}
+\item{lam}{positive tuning parameters for elastic net penalty. If a vector of parameters is provided, they should be in increasing order.}
+
+\item{diagonal}{option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.}
 
 \item{path}{option to return the regularization path. This option should be used with extreme care if the dimension is large. If set to TRUE, cores will be set to 1 and errors and optimal tuning parameters will based on the full sample. Defaults to FALSE.}
 
 \item{crit_out}{criterion for convergence in outer (blockwise) loop. Criterion \code{avg} will loop until the average absolute parameter change is less than \code{tol_out} times tolerance multiple. Criterion \code{max} will loop until the maximum change in the estimated Sigma after an iteration over the parameter set is less than \code{tol_out}. Defaults to \code{avg}.}
 
-\item{crit_in}{criterion for convergence in inner (lasso) loop. Criterion for convergence. Criterion \code{loss} will loop until the change in the objective for each response after an iteration is less than \code{tol_in}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol_in} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol_in} times tolerance multiple. Defaults to \code{loss}.}
+\item{crit_in}{criterion for convergence in inner (lasso) loop. Criterion for convergence. Criterion \code{loss} will loop until the relative change in the objective for each response after an iteration is less than \code{tol_in}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol_in} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol_in} times tolerance multiple. Defaults to \code{loss}.}
 
 \item{tol_out}{convergence tolerance for outer (blockwise) loop. Defaults to 1e-4.}
 
@@ -34,6 +36,8 @@ CV_GLASSOc(X, S, lam, path = FALSE, crit_out = "avg", crit_in = "loss",
 
 \item{K}{specify the number of folds for cross validation.}
 
+\item{crit_cv}{cross validation criterion (\code{loglik}, \code{AIC}, or \code{BIC}). Defaults to \code{loglik}.}
+
 \item{start}{specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.}
 
 \item{trace}{option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.}
@@ -42,9 +46,9 @@ CV_GLASSOc(X, S, lam, path = FALSE, crit_out = "avg", crit_in = "loss",
 list of returns includes:
 \item{lam}{optimal tuning parameter.}
 \item{path}{array containing the solution path. Solutions will be ordered by ascending lambda values.}
-\item{min.error}{minimum average cross validation error for optimal parameters.}
-\item{avg.error}{average cross validation error across all folds.}
-\item{cv.error}{cross validation errors (negative validation likelihood).}
+\item{min.error}{minimum average cross validation error (cv.crit) for optimal parameters.}
+\item{avg.error}{average cross validation error (cv.crit) across all folds.}
+\item{cv.error}{cross validation errors (cv.crit).}//'
 }
 \description{
 Cross validation function for GLASSO.

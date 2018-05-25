@@ -3,6 +3,7 @@
 S3method(plot,GLASSO)
 S3method(print,GLASSO)
 export(GLASSO)
+export(GLASSOc)
 export(LASSO)
 export(lassoc)
 import(RcppProgress)

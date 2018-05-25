@@ -14,54 +14,58 @@ NULL
 #'
 #' @param X option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.
 #' @param S option to provide a pxp sample covariance matrix (denominator n). If argument is \code{NULL} and \code{X} is provided instead then \code{S} will be computed automatically.
-#' @param lam positive tuning parameters for elastic net penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
+#' @param lam positive tuning parameters for elastic net penalty. If a vector of parameters is provided, they should be in increasing order.
+#' @param diagonal option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.
 #' @param path option to return the regularization path. This option should be used with extreme care if the dimension is large. If set to TRUE, cores will be set to 1 and errors and optimal tuning parameters will based on the full sample. Defaults to FALSE.
 #' @param crit_out criterion for convergence in outer (blockwise) loop. Criterion \code{avg} will loop until the average absolute parameter change is less than \code{tol_out} times tolerance multiple. Criterion \code{max} will loop until the maximum change in the estimated Sigma after an iteration over the parameter set is less than \code{tol_out}. Defaults to \code{avg}.
-#' @param crit_in criterion for convergence in inner (lasso) loop. Criterion for convergence. Criterion \code{loss} will loop until the change in the objective for each response after an iteration is less than \code{tol_in}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol_in} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol_in} times tolerance multiple. Defaults to \code{loss}.
+#' @param crit_in criterion for convergence in inner (lasso) loop. Criterion for convergence. Criterion \code{loss} will loop until the relative change in the objective for each response after an iteration is less than \code{tol_in}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol_in} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol_in} times tolerance multiple. Defaults to \code{loss}.
 #' @param tol_out convergence tolerance for outer (blockwise) loop. Defaults to 1e-4.
 #' @param tol_in convergence tolerance for inner (lasso) loop. Defaults to 1e-4.
 #' @param maxit_out maximum number of iterations for outer (blockwise) loop. Defaults to 1e4.
 #' @param maxit_in maximum number of iterations for inner (lasso) loop. Defaults to 1e4.
 #' @param adjmaxit_out adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for "one-step" estimators. Defaults to 1e4.
 #' @param K specify the number of folds for cross validation.
+#' @param crit_cv cross validation criterion (\code{loglik}, \code{AIC}, or \code{BIC}). Defaults to \code{loglik}.
 #' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
 #' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
 #' 
 #' @return list of returns includes:
 #' \item{lam}{optimal tuning parameter.}
 #' \item{path}{array containing the solution path. Solutions will be ordered by ascending lambda values.}
-#' \item{min.error}{minimum average cross validation error for optimal parameters.}
-#' \item{avg.error}{average cross validation error across all folds.}
-#' \item{cv.error}{cross validation errors (negative validation likelihood).}
-#' 
+#' \item{min.error}{minimum average cross validation error (cv.crit) for optimal parameters.}
+#' \item{avg.error}{average cross validation error (cv.crit) across all folds.}
+#' \item{cv.error}{cross validation errors (cv.crit).}//' 
 #' @keywords internal
 #'
-CV_GLASSOc <- function(X, S, lam, path = FALSE, crit_out = "avg", crit_in = "loss", tol_out = 1e-4, tol_in = 1e-4, maxit_out = 1e4L, maxit_in = 1e4L, adjmaxit_out = 1e4L, K = 5L, start = "warm", trace = "progress") {
-    .Call('_GLASSOO_CV_GLASSOc', PACKAGE = 'GLASSOO', X, S, lam, path, crit_out, crit_in, tol_out, tol_in, maxit_out, maxit_in, adjmaxit_out, K, start, trace)
+CV_GLASSOc <- function(X, S, lam, diagonal = FALSE, path = FALSE, crit_out = "avg", crit_in = "loss", tol_out = 1e-4, tol_in = 1e-4, maxit_out = 1e4L, maxit_in = 1e4L, adjmaxit_out = 1e4L, K = 5L, crit_cv = "loglik", start = "warm", trace = "progress") {
+    .Call('_GLASSOO_CV_GLASSOc', PACKAGE = 'GLASSOO', X, S, lam, diagonal, path, crit_out, crit_in, tol_out, tol_in, maxit_out, maxit_in, adjmaxit_out, K, crit_cv, start, trace)
 }
 
 #' @title CV (no folds) penalized precision matrix estimation (c++)
 #' @description Cross validation (no folds) function for GLASSO. This function is to be used with CVP_GLASSO.
 #'
+#' @param n sample size for X_valid (used to calculate crit_cv)
 #' @param S_train pxp sample covariance matrix for training data (denominator n).
 #' @param S_valid pxp sample covariance matrix for validation data (denominator n).
-#' @param lam positive tuning parameters for elastic net penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
+#' @param lam positive tuning parameters for elastic net penalty. If a vector of parameters is provided, they should be in increasing order.
+#' @param diagonal option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.
 #' @param crit_out criterion for convergence in outer (blockwise) loop. Criterion \code{avg} will loop until the average absolute parameter change is less than \code{tol_out} times tolerance multiple. Criterion \code{max} will loop until the maximum change in the estimated Sigma after an iteration over the parameter set is less than \code{tol_out}. Defaults to \code{avg}.
-#' @param crit_in criterion for convergence in inner (lasso) loop. Criterion for convergence. Criterion \code{loss} will loop until the change in the objective for each response after an iteration is less than \code{tol_in}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol_in} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol_in} times tolerance multiple. Defaults to \code{loss}.
+#' @param crit_in criterion for convergence in inner (lasso) loop. Criterion for convergence. Criterion \code{loss} will loop until the relative change in the objective for each response after an iteration is less than \code{tol_in}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol_in} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol_in} times tolerance multiple. Defaults to \code{loss}.
 #' @param tol_out convergence tolerance for outer (blockwise) loop. Defaults to 1e-4.
 #' @param tol_in convergence tolerance for inner (lasso) loop. Defaults to 1e-4.
 #' @param maxit_out maximum number of iterations for outer (blockwise) loop. Defaults to 1e4.
 #' @param maxit_in maximum number of iterations for inner (lasso) loop. Defaults to 1e4.
 #' @param adjmaxit_out adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for "one-step" estimators. Defaults to 1e4.
+#' @param crit_cv cross validation criterion (\code{loglik}, \code{AIC}, or \code{BIC}). Defaults to \code{loglik}.
 #' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
 #' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
 #' 
-#' @return cross validation errors (negative validation likelihood)
+#' @return cross validation errors (crit_cv)
 #' 
 #' @keywords internal
 #'
-CVP_GLASSOc <- function(S_train, S_valid, lam, crit_out = "avg", crit_in = "loss", tol_out = 1e-4, tol_in = 1e-4, maxit_out = 1e4L, maxit_in = 1e4L, adjmaxit_out = 1e4L, start = "warm", trace = "progress") {
-    .Call('_GLASSOO_CVP_GLASSOc', PACKAGE = 'GLASSOO', S_train, S_valid, lam, crit_out, crit_in, tol_out, tol_in, maxit_out, maxit_in, adjmaxit_out, start, trace)
+CVP_GLASSOc <- function(n, S_train, S_valid, lam, diagonal = FALSE, crit_out = "avg", crit_in = "loss", tol_out = 1e-4, tol_in = 1e-4, maxit_out = 1e4L, maxit_in = 1e4L, adjmaxit_out = 1e4L, crit_cv = "loglik", start = "warm", trace = "progress") {
+    .Call('_GLASSOO_CVP_GLASSOc', PACKAGE = 'GLASSOO', n, S_train, S_valid, lam, diagonal, crit_out, crit_in, tol_out, tol_in, maxit_out, maxit_in, adjmaxit_out, crit_cv, start, trace)
 }
 
 #' @title Penalized precision matrix estimation (c++)
@@ -75,7 +79,7 @@ CVP_GLASSOc <- function(S_train, S_valid, lam, crit_out = "avg", crit_in = "loss
 #' @param initSigma initialization matrix for estimated covariance matrix Sigma
 #' @param lam tuning parameter for lasso penalty.
 #' @param crit_out criterion for convergence in outer (blockwise) loop. Criterion \code{avg} will loop until the average absolute parameter change is less than \code{tol_out} times tolerance multiple. Criterion \code{max} will loop until the maximum change in the estimated Sigma after an iteration over the parameter set is less than \code{tol_out}. Defaults to \code{avg}.
-#' @param crit_in criterion for convergence in inner (lasso) loop. Criterion for convergence. Criterion \code{loss} will loop until the change in the objective for each response after an iteration is less than \code{tol_in}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol_in} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol_in} times tolerance multiple. Defaults to \code{loss}.
+#' @param crit_in criterion for convergence in inner (lasso) loop. Criterion for convergence. Criterion \code{loss} will loop until the relative change in the objective for each response after an iteration is less than \code{tol_in}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol_in} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol_in} times tolerance multiple. Defaults to \code{loss}.
 #' @param tol_out convergence tolerance for outer (blockwise) loop. Defaults to 1e-4.
 #' @param tol_in convergence tolerance for inner (lasso) loop. Defaults to 1e-4.
 #' @param maxit_out maximum number of iterations for outer (blockwise) loop. Defaults to 1e4.
@@ -89,14 +93,21 @@ CVP_GLASSOc <- function(S_train, S_valid, lam, crit_out = "avg", crit_in = "loss
 #' 
 #' @references
 #' \itemize{
-#' \item 
-#' For more information on the graphical lasso algorithm, see: \cr
-#' Friedman, Jerome, Trevor Hastie, and Robert Tibshirani. "Sparse inverse covariance estimation with the graphical lasso." \emph{Biostatistics} 9.3 (2008): 432-441.\cr
-#' \url{http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf}
+#' \item Friedman, Jerome, Trevor Hastie, and Robert Tibshirani. 'Sparse inverse covariance estimation with the graphical lasso.' \emph{Biostatistics} 9.3 (2008): 432-441.
+#' \item Banerjee, Onureen, Ghauoui, Laurent El, and d'Aspremont, Alexandre. 2008. "Model Selection through Sparse Maximum Likelihood Estimation for Multivariate Gaussian or Binary Data." \emph{Journal of Machine Learning Research} 9: 485-516.
+#' \item Tibshirani, Robert. 1996. "Regression Shrinkage and Selection via the Lasso." \emph{Journal of the Royal Statistical Society. Series B (Methodological)}. JSTOR: 267-288.
+#' \item Meinshausen, Nicolai and Buhlmann, Peter. 2006. "High-Dimensional Graphs and Variable Selection with the Lasso." \emph{The Annals of Statistics}. JSTOR: 1436-1462.
+#' \item Witten, Daniela M, Friedman, Jerome H, and Simon, Noah. 2011. "New Insights and Faster computations for the Graphical Lasso." \emph{Journal of Computation and Graphical Statistics}. Taylor and Francis: 892-900.
+#' \item Tibshirani, Robert, Bien, Jacob, Friedman, Jerome, Hastie, Trevor, Simon, Noah, Jonathan, Taylor, and Tibshirani, Ryan J. "Strong Rules for Discarding Predictors in Lasso-Type Problems." \emph{Journal of the Royal Statistical Society: Series B (Statistical Methodology)}. Wiley Online Library 74 (2): 245-266.
+#' \item Ghaoui, Laurent El, Viallon, Vivian, and Rabbani, Tarek. 2010. "Safe Feature Elimination for the Lasso and Sparse Supervised Learning Problems." \emph{arXiv preprint arXiv: 1009.4219}.
+#' \item Osborne, Michael R, Presnell, Brett, and Turlach, Berwin A. "On the Lasso and its Dual." \emph{Journal of Computational and Graphical Statistics}. Taylor and Francis 9 (2): 319-337.
+#' \item Rothman, Adam. 2017. "STAT 8931 notes on an algorithm to compute the Lasso-penalized Gausssian likelihood precision matrix estimator." 
 #' }
 #' 
 #' @author Matt Galloway \email{gall0441@@umn.edu}
 #' 
+#' @export
+#'
 #' @keywords internal
 #'
 GLASSOc <- function(S, initSigma, lam, crit_out = "avg", crit_in = "loss", tol_out = 1e-4, tol_in = 1e-4, maxit_out = 1e4L, maxit_in = 1e4L) {
@@ -115,7 +126,7 @@ GLASSOc <- function(S, initSigma, lam, crit_out = "avg", crit_in = "loss", tol_o
 #' @param initB initialization for beta regression coefficients.
 #' @param ind optional matrix specifying which coefficients will be penalized.
 #' @param lam tuning parameter for lasso regularization term. Defaults to \code{lam = 0.1}.
-#' @param crit criterion for convergence. Criterion \code{loss} will loop until the change in the objective for each response after an iteration is less than \code{tol}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol} times tolerance multiple. Defaults to \code{loss}.
+#' @param crit criterion for convergence. Criterion \code{loss} will loop until the relative change in the objective for each response after an iteration is less than \code{tol}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol} times tolerance multiple. Defaults to \code{loss}.
 #' @param tol tolerance for algorithm convergence. Defaults to 1e-4.
 #' @param maxit maximum iterations. Defaults to 1e4.
 #' 
@@ -126,10 +137,13 @@ GLASSOc <- function(S, initSigma, lam, crit_out = "avg", crit_in = "loss", tol_o
 #' 
 #' @references
 #' \itemize{
-#' \item 
-#' For more information on the coordinate descent algorithm, see: \cr
-#' Friedman, Jerome, et al. "Pathwise coordinate optimization." \emph{The Annals of Applied Statistics} 1.2 (2007): 302-332.\cr
-#' \url{https://arxiv.org/pdf/0708.1485.pdf}
+#' \item Friedman, Jerome, et al. "Pathwise coordinate optimization." \emph{The Annals of Applied Statistics} 1.2 (2007): 302-332. \url{https://arxiv.org/pdf/0708.1485.pdf}
+#' \item Tibshirani, Robert. 1996. "Regression Shrinkage and Selection via the Lasso." \emph{Journal of the Royal Statistical Society. Series B (Methodological)}. JSTOR: 267-288.
+#' \item Tibshirani, Robert, Bien, Jacob, Friedman, Jerome, Hastie, Trevor, Simon, Noah, Jonathan, Taylor, and Tibshirani, Ryan J. "Strong Rules for Discarding Predictors in Lasso-Type Problems." \emph{Journal of the Royal Statistical Society: Series B (Statistical Methodology)}. Wiley Online Library 74 (2): 245-266.
+#' \item Ghaoui, Laurent El, Viallon, Vivian, and Rabbani, Tarek. 2010. "Safe Feature Elimination for the Lasso and Sparse Supervised Learning Problems." \emph{arXiv preprint arXiv: 1009.4219}.
+#' \item Osborne, Michael R, Presnell, Brett, and Turlach, Berwin A. "On the Lasso and its Dual." \emph{Journal of Computational and Graphical Statistics}. Taylor and Francis 9 (2): 319-337.
+NULL
+
 #' }
 #' 
 #' @author Matt Galloway \email{gall0441@@umn.edu}

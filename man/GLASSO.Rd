@@ -4,18 +4,24 @@
 \alias{GLASSO}
 \title{Penalized precision matrix estimation}
 \usage{
-GLASSO(X = NULL, S = NULL, lam = 10^seq(-2, 5, 0.5), diagonal = FALSE,
-  path = FALSE, crit.out = c("avg", "max"), crit.in = c("loss", "avg",
-  "max"), tol.out = 1e-04, tol.in = 1e-04, maxit.out = 10000,
-  maxit.in = 10000, adjmaxit.out = NULL, K = 5, start = c("warm",
-  "cold"), cores = 1, trace = c("progress", "print", "none"))
+GLASSO(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
+  lam = NULL, diagonal = FALSE, path = FALSE, crit.out = c("avg",
+  "max"), crit.in = c("loss", "avg", "max"), tol.out = 1e-04,
+  tol.in = 1e-04, maxit.out = 10000, maxit.in = 10000,
+  adjmaxit.out = NULL, K = 5, crit.cv = c("loglik", "AIC", "BIC"),
+  start = c("warm", "cold"), cores = 1, trace = c("progress", "print",
+  "none"))
 }
 \arguments{
 \item{X}{option to provide a nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
 
 \item{S}{option to provide a pxp sample covariance matrix (denominator n). If argument is \code{NULL} and \code{X} is provided instead then \code{S} will be computed automatically.}
 
-\item{lam}{tuning parameter for elastic net penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.}
+\item{nlam}{number of \code{lam} tuning parameters for penalty term generated from \code{lam.min.ratio} and \code{lam.max} (automatically generated). Defaults to 10.}
+
+\item{lam.min.ratio}{smallest \code{lam} value provided as a fraction of \code{lam.max}. The function will automatically generate \code{nlam} tuning parameters from \code{lam.min.ratio*lam.max} to \code{lam.max} in log10 scale. \code{lam.max} is calculated to be the smallest \code{lam} such that all off-diagonal entries in \code{Omega} are equal to zero (\code{alpha} = 1). Defaults to 1e-2.}
+
+\item{lam}{option to provide positive tuning parameters for penalty term. This will cause \code{nlam} and \code{lam.min.ratio} to be disregarded. If a vector of parameters is provided, they should be in increasing order. Defaults to NULL.}
 
 \item{diagonal}{option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.}
 
@@ -23,7 +29,7 @@ GLASSO(X = NULL, S = NULL, lam = 10^seq(-2, 5, 0.5), diagonal = FALSE,
 
 \item{crit.out}{criterion for convergence in outer (blockwise) loop. Criterion \code{avg} will loop until the average absolute parameter change is less than \code{tol.out} times tolerance multiple. Criterion \code{max} will loop until the maximum change in the estimated Sigma after an iteration over the parameter set is less than \code{tol.out}. Defaults to \code{avg}.}
 
-\item{crit.in}{criterion for convergence in inner (lasso) loop. Criterion for convergence. Criterion \code{loss} will loop until the change in the objective for each response after an iteration is less than \code{tol.in}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol.in} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol.in} times tolerance multiple. Defaults to \code{loss}.}
+\item{crit.in}{criterion for convergence in inner (lasso) loop. Criterion for convergence. Criterion \code{loss} will loop until the relative change in the objective for each response after an iteration is less than \code{tol.in}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol.in} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol.in} times tolerance multiple. Defaults to \code{loss}.}
 
 \item{tol.out}{convergence tolerance for outer (blockwise) loop. Defaults to 1e-4.}
 
@@ -36,6 +42,8 @@ GLASSO(X = NULL, S = NULL, lam = 10^seq(-2, 5, 0.5), diagonal = FALSE,
 \item{adjmaxit.out}{adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for 'one-step' estimators. Defaults to NULL.}
 
 \item{K}{specify the number of folds for cross validation.}
+
+\item{crit.cv}{cross validation criterion (\code{loglik}, \code{AIC}, or \code{BIC}). Defaults to \code{loglik}.}
 
 \item{start}{specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.}
 
@@ -54,10 +62,9 @@ returns class object \code{ADMMsigma} which includes:
 \item{Omega}{estimated penalized precision matrix.}
 \item{Sigma}{estimated covariance matrix from the penalized precision matrix (inverse of Omega).}
 \item{Path}{array containing the solution path. Solutions will be ordered by ascending lambda values.}
-\item{Loglik}{penalized log-likelihood for Omega}
-\item{MIN.error}{minimum average cross validation error for optimal parameters.}
-\item{AVG.error}{average cross validation error across all folds.}
-\item{CV.error}{cross validation errors (negative validation likelihood).}
+\item{MIN.error}{minimum average cross validation error (cv.crit) for optimal parameters.}
+\item{AVG.error}{average cross validation error (cv.crit) across all folds.}
+\item{CV.error}{cross validation errors (cv.crit).}
 }
 \description{
 Penalized precision matrix estimation using the graphical lasso (glasso) algorithm.
@@ -100,10 +107,15 @@ GLASSO(X)
 }
 \references{
 \itemize{
-\item 
-For more information on the graphical lasso algorithm, see: \cr
-Friedman, Jerome, Trevor Hastie, and Robert Tibshirani. 'Sparse inverse covariance estimation with the graphical lasso.' \emph{Biostatistics} 9.3 (2008): 432-441.\cr
-\url{http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf}
+\item Friedman, Jerome, Trevor Hastie, and Robert Tibshirani. 'Sparse inverse covariance estimation with the graphical lasso.' \emph{Biostatistics} 9.3 (2008): 432-441.
+\item Banerjee, Onureen, Ghauoui, Laurent El, and d'Aspremont, Alexandre. 2008. 'Model Selection through Sparse Maximum Likelihood Estimation for Multivariate Gaussian or Binary Data.' \emph{Journal of Machine Learning Research} 9: 485-516.
+\item Tibshirani, Robert. 1996. 'Regression Shrinkage and Selection via the Lasso.' \emph{Journal of the Royal Statistical Society. Series B (Methodological)}. JSTOR: 267-288.
+\item Meinshausen, Nicolai and Buhlmann, Peter. 2006. 'High-Dimensional Graphs and Variable Selection with the Lasso.' \emph{The Annals of Statistics}. JSTOR: 1436-1462.
+\item Witten, Daniela M, Friedman, Jerome H, and Simon, Noah. 2011. 'New Insights and Faster computations for the Graphical Lasso.' \emph{Journal of Computation and Graphical Statistics}. Taylor and Francis: 892-900.
+\item Tibshirani, Robert, Bien, Jacob, Friedman, Jerome, Hastie, Trevor, Simon, Noah, Jonathan, Taylor, and Tibshirani, Ryan J. 'Strong Rules for Discarding Predictors in Lasso-Type Problems.' \emph{Journal of the Royal Statistical Society: Series B (Statistical Methodology)}. Wiley Online Library 74 (2): 245-266.
+\item Ghaoui, Laurent El, Viallon, Vivian, and Rabbani, Tarek. 2010. 'Safe Feature Elimination for the Lasso and Sparse Supervised Learning Problems.' \emph{arXiv preprint arXiv: 1009.4219}.
+\item Osborne, Michael R, Presnell, Brett, and Turlach, Berwin A. 'On the Lasso and its Dual.' \emph{Journal of Computational and Graphical Statistics}. Taylor and Francis 9 (2): 319-337.
+\item Rothman, Adam. 2017. 'STAT 8931 notes on an algorithm to compute the Lasso-penalized Gausssian likelihood precision matrix estimator.' 
 }
 }
 \seealso{
