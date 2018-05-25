@@ -238,9 +238,10 @@ GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
         }
         
         # compute final estimate at best tuning parameters
-        GLASSO = GLASSOc(S = S, initSigma = init, lam = GLASSO$lam, 
-            crit_out = crit.out, crit_in = crit.in, tol_out = tol.out, 
-            tol_in = tol.in, maxit_out = maxit.out, maxit_in = maxit.in)
+        GLASSO = GLASSOc(S = S, initSigma = init, initOmega = diag(ncol(S)), 
+            lam = GLASSO$lam, crit_out = crit.out, crit_in = crit.in, 
+            tol_out = tol.out, tol_in = tol.in, maxit_out = maxit.out, 
+            maxit_in = maxit.in)
         
         
     } else {
@@ -266,9 +267,10 @@ GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
             
         }
         
-        GLASSO = GLASSOc(S = S, initSigma = init, lam = lam, 
-            crit_out = crit.out, crit_in = crit.in, tol_out = tol.out, 
-            tol_in = tol.in, maxit_out = maxit.out, maxit_in = maxit.in)
+        GLASSO = GLASSOc(S = S, initSigma = init, initOmega = diag(ncol(S)), 
+            lam = lam, crit_out = crit.out, crit_in = crit.in, 
+            tol_out = tol.out, tol_in = tol.in, maxit_out = maxit.out, 
+            maxit_in = maxit.in)
         
     }
     

@@ -19,6 +19,7 @@ using namespace Rcpp;
 //'
 //' @param S pxp sample covariance matrix (denominator n).
 //' @param initSigma initialization matrix for estimated covariance matrix Sigma
+//' @param initOmega initialization matrix for Omega used to initialize the Betas
 //' @param lam tuning parameter for lasso penalty.
 //' @param crit_out criterion for convergence in outer (blockwise) loop. Criterion \code{avg} will loop until the average absolute parameter change is less than \code{tol_out} times tolerance multiple. Criterion \code{max} will loop until the maximum change in the estimated Sigma after an iteration over the parameter set is less than \code{tol_out}. Defaults to \code{avg}.
 //' @param crit_in criterion for convergence in inner (lasso) loop. Criterion for convergence. Criterion \code{loss} will loop until the relative change in the objective for each response after an iteration is less than \code{tol_in}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol_in} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol_in} times tolerance multiple. Defaults to \code{loss}.
@@ -53,18 +54,23 @@ using namespace Rcpp;
 //' @keywords internal
 //'
 // [[Rcpp::export]]
-List GLASSOc(const arma::mat &S, const arma::mat &initSigma, const double lam, std::string crit_out = "avg", std::string crit_in = "loss", const double tol_out = 1e-4, const double tol_in = 1e-4, const int maxit_out = 1e4, const int maxit_in = 1e4){
+List GLASSOc(const arma::mat &S, const arma::mat &initSigma, const arma::mat &initOmega, const double lam, std::string crit_out = "avg", std::string crit_in = "loss", const double tol_out = 1e-4, const double tol_in = 1e-4, const int maxit_out = 1e4, const int maxit_in = 1e4){
   
   // allocate memory
   bool criterion = true;
   int P = S.n_cols, iter = 0;
   double mult;
-  arma::mat Sigmatemp(P - 1, P - 1, arma::fill::zeros), Stemp, Omegatemp(P, 1, arma::fill::zeros), ind(P - 1, 1, arma::fill::ones), Beta, Betas, H, Omega(P, P, arma::fill::eye), Sigma(initSigma), Sigma2(initSigma), Sminus(S);
-  Beta = Stemp = arma::zeros<arma::mat>(P - 1, 1);
-  Betas = H = arma::zeros<arma::mat>(P - 1, P);
+  arma::mat Sigmatemp(P - 1, P - 1, arma::fill::zeros), Stemp, Omegatemp(P, 1, arma::fill::zeros), ind(P - 1, 1, arma::fill::ones);
+  arma::mat maxes, Beta, Betas, Stemps, zeros, H, Omega(P, P, arma::fill::eye), Sigma(initSigma), Sigma2(initSigma), Sminus(S);
+  Beta = zeros = Stemp = arma::zeros<arma::mat>(P - 1, 1);
+  Betas = Stemps = H = arma::zeros<arma::mat>(P - 1, P);
   Sminus -= arma::diagmat(Sminus);
   mult = arma::accu(arma::abs(Sminus));
   
+  // initialize Betas and Stemps
+  extractdividec(initOmega, Betas);
+  extractc(S, Stemps);
+  maxes = arma::abs(arma::max(Stemps, 0));
   
   // loop until convergence
   while (criterion && (iter < maxit_out)){
@@ -75,25 +81,32 @@ List GLASSOc(const arma::mat &S, const arma::mat &initSigma, const double lam, s
     
     // blockwise coordinate descent
     for (int p = 0; p < P; p++){
-      
-      // update Beta with pth column of Betas
-      Beta = Betas.col(p);
-      
-      // set Sigmatemp = Sigma[-p, -p]
-      reducec(Sigma2, Sigmatemp, p);
-      
-      // initialize H matrix used in lassoc (Sigmatemp.minus*Beta)
-      H = Sigmatemp*Beta - Sigmatemp.diag() % Beta;
-      
-      // set Stemp = S[-p, p]
-      extractc(S, Stemp, p);
-      
-      // execute LASSO
-      List LASSO = lassoc(Sigmatemp, Stemp, Beta, H, ind, lam, crit_in, tol_in, maxit_in);
-      Betas.col(p) = as<arma::mat>(LASSO["Coefficients"]);
-      
-      // update Stemp = Sigma12
-      Stemp = Sigmatemp*Betas.col(p);
+      if (lam > maxes(p)){
+        
+        // if true, then set Stemp = Betas[, p] = 0 if lam > maxes(p)
+        Stemp = zeros;
+        Betas.col(p) = zeros;
+        
+      } else {
+        
+        // update Beta with pth column of Betas
+        Beta = Betas.col(p);
+        
+        // set Sigmatemp = Sigma[-p, -p]
+        reducec(Sigma2, Sigmatemp, p);
+        
+        // initialize Stemp and H matrix used in lassoc (Sigmatemp.minus*Beta)
+        Stemp = Stemps.col(p);
+        H = Sigmatemp*Beta - Sigmatemp.diag() % Beta;
+        
+        // execute LASSO
+        List LASSO = lassoc(Sigmatemp, Stemp, Beta, H, ind, lam, crit_in, tol_in, maxit_in);
+        Betas.col(p) = as<arma::mat>(LASSO["Coefficients"]);
+        
+        // update Stemp = Sigma12
+        Stemp = Sigmatemp*Betas.col(p);
+        
+      }
       
       // update Sigma[-p, p] = Sigma[p, -p] = Stemp
       updatec(Sigma2, Stemp, p);
@@ -122,13 +135,11 @@ List GLASSOc(const arma::mat &S, const arma::mat &initSigma, const double lam, s
   
   
   // compute Omega from Sigma
+  extractc(Sigma, Stemps);
   for (int p = 0; p < P; p++){
     
-    // update Stemp = Sigma[-p, p]
-    extractc(Sigma, Stemp, p);
-    
     // update Omega[p, p] and Omegatemp = Omega12
-    Omega(p, p) = 1/(Sigma2(p, p) - arma::accu(Stemp % Betas.col(p)));
+    Omega(p, p) = 1/(Sigma2(p, p) - arma::accu(Stemps.col(p) % Betas.col(p)));
     Omegatemp = -Omega(p, p)*Betas.col(p);
     
     // set Omega[-p, p] = Omega[p, -p] = Omegatemp

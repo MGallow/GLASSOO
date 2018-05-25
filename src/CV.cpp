@@ -75,8 +75,9 @@ List CV_GLASSOc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam,
   // initialization
   int n, p = S.n_cols, l = lam.n_rows, initmaxit = maxit_out;
   double sgn = 0, logdet = 0, lam_, alpha;
-  arma::mat X_train, X_test, S_train(S), S_test(S), initSigma(S);
-  arma::mat Omega, Sigma, CV_errors(l, K, arma::fill::zeros);
+  arma::mat X_train, X_test, S_train(S), S_test(S), initSigma(S), initOmega;
+  arma::mat Omega, Sigma, identity, CV_errors(l, K, arma::fill::zeros);
+  initOmega = identity = arma::eye<arma::mat>(p, p);
   arma::colvec CV_error, zerosl(l, arma::fill::zeros); arma::rowvec X_bar;
   arma::uvec index, index_; arma::vec folds; arma::cube Path;
   Progress progress(l*K, trace == "progress");
@@ -85,20 +86,8 @@ List CV_GLASSOc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam,
   // no need to create folds if K = 1
   if (K == 1){
     
-    // initial sigma
+    // set sample size
     n = initSigma.n_rows;
-    if (!diagonal){
-      
-      // provide estimate that is pd and dual feasible
-      initSigma -=arma::diagmat(initSigma); initSigma = arma::abs(initSigma);
-      alpha = lam[0]/initSigma.max();
-      if (alpha >= 1){
-        alpha = 1;
-      }
-      initSigma = (1 - alpha)*initSigma;
-      initSigma.diag() = S.diag();
-      
-    }
     
     // initialize Path, if necessary
     if (path){
@@ -115,10 +104,6 @@ List CV_GLASSOc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam,
   
   // parse data into folds and perform CV
   for (int k = 0; k < K; k++){
-    
-    // re-initialize values for each fold
-    CV_error = zerosl; maxit_out = initmaxit;
-    
     if (K > 1) {
       
       // separate into training and testing data
@@ -139,21 +124,26 @@ List CV_GLASSOc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam,
       S_train = arma::cov(X_train, 1);
       S_test = arma::cov(X_test, 1);
       
-      // initial sigma
-      if (!diagonal){
-        
-        // provide estimate that is pd and dual feasible
-        initSigma = S_train;
-        initSigma -=arma::diagmat(initSigma); initSigma = arma::abs(initSigma);
-        alpha = lam[0]/initSigma.max();
-        if (alpha >= 1){
-          alpha = 1;
-        }
-        initSigma = (1 - alpha)*initSigma;
-        initSigma.diag() = S_train.diag();
-        
-      }
     }
+    
+    // re-initialize values for each fold
+    CV_error = zerosl; maxit_out = initmaxit;
+    initSigma = S_train; initOmega = identity;
+    
+    // initial sigma, if not diagonal
+    if (!diagonal){
+      
+      // provide estimate that is pd and dual feasible
+      initSigma -=arma::diagmat(initSigma); initSigma = arma::abs(initSigma);
+      alpha = lam[0]/initSigma.max();
+      if (alpha >= 1){
+        alpha = 1;
+      }
+      initSigma = (1 - alpha)*initSigma;
+      initSigma.diag() = S_train.diag();
+      
+    }
+    
     
     // loop over all tuning parameters
     for (int i = 0; i < l; i++){
@@ -167,7 +157,7 @@ List CV_GLASSOc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam,
       }
       
       // compute the ridge-penalized likelihood precision matrix estimator at the ith value in lam:
-      List GLASSO = GLASSOc(S_train, initSigma, lam_, crit_out, crit_in, tol_out, tol_in, maxit_out, maxit_in);
+      List GLASSO = GLASSOc(S_train, initSigma, initOmega, lam_, crit_out, crit_in, tol_out, tol_in, maxit_out, maxit_in);
       Omega = as<arma::mat>(GLASSO["Omega"]);
       
       
@@ -175,6 +165,7 @@ List CV_GLASSOc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam,
         
         // option to save initial values for warm starts
         initSigma = as<arma::mat>(GLASSO["Sigma"]);
+        initOmega = as<arma::mat>(GLASSO["Omega"]);
         maxit_out = adjmaxit_out;
         
       }

@@ -45,24 +45,57 @@ void reducec(const arma::mat &X, arma::mat &Y, const int &p) {
 
 
 //' @title Extract (c++)
-//' @description This function extracts the pth column with the pth row removed from a matrix (ie: Y = X[-p, p]).
+//' @description This function updates an existing matrix by setting the pth columm of Y equal to the pth column with the pth row of X (ie: Y[, p] = X[-p, p] for all p).
 //'
 //' @param X matrix
 //' @param Y matrix
-//' @param p column number
 //' @keywords internal
 //'
 
-void extractc(const arma::mat &X, arma::mat &Y, const int &p) {
+void extractc(const arma::mat &X, arma::mat &Y) {
   
   // loop over all elements of Y and update accordingly
   for (int i = 0; i < Y.n_rows; i++){
-    
-    if (i < p){
-      Y(i, 0) = X(i, p);
+    for (int j = 0; j < Y.n_cols; j++){
       
-    } else {
-      Y(i, 0) = X(i + 1, p);
+      if (i < j){
+        Y(i, j) = X(i, j);
+        
+      } else {
+        Y(i, j) = X(i + 1, j);
+      }
+    }
+  }
+  
+}
+
+
+
+
+////-----------------------------------------------------
+
+
+
+//' @title Extract and Divide (c++)
+//' @description This function updates an existing matrix by setting the pth columm of Y equal to the pth column with the pth row of X removed divided the pth diagonal element (ie: Y[, p] = X[-p, p]/X[p, p] for all p).
+//'
+//' @param X matrix
+//' @param Y matrix
+//' @keywords internal
+//'
+
+void extractdividec(const arma::mat &X, arma::mat &Y) {
+  
+  // loop over all elements of Y and update accordingly
+  for (int i = 0; i < Y.n_rows; i++){
+    for (int j = 0; j < Y.n_cols; j++){
+      
+      if (i < j){
+        Y(i, j) = X(i, j)/X(j, j);
+        
+      } else {
+        Y(i, j) = X(i + 1, j)/X(j, j);
+      }
     }
   }
   

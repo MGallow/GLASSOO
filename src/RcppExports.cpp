@@ -58,13 +58,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // GLASSOc
-List GLASSOc(const arma::mat& S, const arma::mat& initSigma, const double lam, std::string crit_out, std::string crit_in, const double tol_out, const double tol_in, const int maxit_out, const int maxit_in);
-RcppExport SEXP _GLASSOO_GLASSOc(SEXP SSEXP, SEXP initSigmaSEXP, SEXP lamSEXP, SEXP crit_outSEXP, SEXP crit_inSEXP, SEXP tol_outSEXP, SEXP tol_inSEXP, SEXP maxit_outSEXP, SEXP maxit_inSEXP) {
+List GLASSOc(const arma::mat& S, const arma::mat& initSigma, const arma::mat& initOmega, const double lam, std::string crit_out, std::string crit_in, const double tol_out, const double tol_in, const int maxit_out, const int maxit_in);
+RcppExport SEXP _GLASSOO_GLASSOc(SEXP SSEXP, SEXP initSigmaSEXP, SEXP initOmegaSEXP, SEXP lamSEXP, SEXP crit_outSEXP, SEXP crit_inSEXP, SEXP tol_outSEXP, SEXP tol_inSEXP, SEXP maxit_outSEXP, SEXP maxit_inSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type initSigma(initSigmaSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type initOmega(initOmegaSEXP);
     Rcpp::traits::input_parameter< const double >::type lam(lamSEXP);
     Rcpp::traits::input_parameter< std::string >::type crit_out(crit_outSEXP);
     Rcpp::traits::input_parameter< std::string >::type crit_in(crit_inSEXP);
@@ -72,7 +73,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double >::type tol_in(tol_inSEXP);
     Rcpp::traits::input_parameter< const int >::type maxit_out(maxit_outSEXP);
     Rcpp::traits::input_parameter< const int >::type maxit_in(maxit_inSEXP);
-    rcpp_result_gen = Rcpp::wrap(GLASSOc(S, initSigma, lam, crit_out, crit_in, tol_out, tol_in, maxit_out, maxit_in));
+    rcpp_result_gen = Rcpp::wrap(GLASSOc(S, initSigma, initOmega, lam, crit_out, crit_in, tol_out, tol_in, maxit_out, maxit_in));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -99,7 +100,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_GLASSOO_CV_GLASSOc", (DL_FUNC) &_GLASSOO_CV_GLASSOc, 16},
     {"_GLASSOO_CVP_GLASSOc", (DL_FUNC) &_GLASSOO_CVP_GLASSOc, 15},
-    {"_GLASSOO_GLASSOc", (DL_FUNC) &_GLASSOO_GLASSOc, 9},
+    {"_GLASSOO_GLASSOc", (DL_FUNC) &_GLASSOO_GLASSOc, 10},
     {"_GLASSOO_lassoc", (DL_FUNC) &_GLASSOO_lassoc, 9},
     {NULL, NULL, 0}
 };

@@ -40,7 +40,7 @@ arma::mat CVP_GLASSOc(const int n, const arma::mat &S_train, const arma::mat &S_
   // initialization
   int p = S_train.n_rows, l = lam.n_rows;
   double sgn = 0, logdet = 0, lam_, alpha;
-  arma::mat Omega, Sigma, initSigma(S_train), CV_error(l, 1, arma::fill::zeros);
+  arma::mat Omega, initOmega(p, p, arma::fill::eye), Sigma, initSigma(S_train), CV_error(l, 1, arma::fill::zeros);
   Progress progress(l, trace == "progress");
   
   
@@ -70,13 +70,14 @@ arma::mat CVP_GLASSOc(const int n, const arma::mat &S_train, const arma::mat &S_
     }
     
     // compute the penalized likelihood precision matrix estimator at the ith value in lam:
-    List GLASSO = GLASSOc(S_train, initSigma, lam_, crit_out, crit_in, tol_out, tol_in, maxit_out, maxit_in);
+    List GLASSO = GLASSOc(S_train, initSigma, initOmega, lam_, crit_out, crit_in, tol_out, tol_in, maxit_out, maxit_in);
     Omega = as<arma::mat>(GLASSO["Omega"]);
     
     if (start == "warm"){
       
       // option to save initial values for warm starts
       initSigma = as<arma::mat>(GLASSO["Sigma"]);
+      initOmega = as<arma::mat>(GLASSO["Omega"]);
       maxit_out = adjmaxit_out;
       
     }

@@ -77,6 +77,7 @@ CVP_GLASSOc <- function(n, S_train, S_valid, lam, diagonal = FALSE, crit_out = "
 #'
 #' @param S pxp sample covariance matrix (denominator n).
 #' @param initSigma initialization matrix for estimated covariance matrix Sigma
+#' @param initOmega initialization matrix for Omega used to initialize the Betas
 #' @param lam tuning parameter for lasso penalty.
 #' @param crit_out criterion for convergence in outer (blockwise) loop. Criterion \code{avg} will loop until the average absolute parameter change is less than \code{tol_out} times tolerance multiple. Criterion \code{max} will loop until the maximum change in the estimated Sigma after an iteration over the parameter set is less than \code{tol_out}. Defaults to \code{avg}.
 #' @param crit_in criterion for convergence in inner (lasso) loop. Criterion for convergence. Criterion \code{loss} will loop until the relative change in the objective for each response after an iteration is less than \code{tol_in}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol_in} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol_in} times tolerance multiple. Defaults to \code{loss}.
@@ -110,8 +111,8 @@ CVP_GLASSOc <- function(n, S_train, S_valid, lam, diagonal = FALSE, crit_out = "
 #'
 #' @keywords internal
 #'
-GLASSOc <- function(S, initSigma, lam, crit_out = "avg", crit_in = "loss", tol_out = 1e-4, tol_in = 1e-4, maxit_out = 1e4L, maxit_in = 1e4L) {
-    .Call('_GLASSOO_GLASSOc', PACKAGE = 'GLASSOO', S, initSigma, lam, crit_out, crit_in, tol_out, tol_in, maxit_out, maxit_in)
+GLASSOc <- function(S, initSigma, initOmega, lam, crit_out = "avg", crit_in = "loss", tol_out = 1e-4, tol_in = 1e-4, maxit_out = 1e4L, maxit_in = 1e4L) {
+    .Call('_GLASSOO_GLASSOc', PACKAGE = 'GLASSOO', S, initSigma, initOmega, lam, crit_out, crit_in, tol_out, tol_in, maxit_out, maxit_in)
 }
 
 #' @title Lasso Regression (c++)

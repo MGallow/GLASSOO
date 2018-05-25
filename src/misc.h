@@ -7,7 +7,9 @@
 
 void reducec(const arma::mat &X, arma::mat &Y, const int &p);
 
-void extractc(const arma::mat &X, arma::mat &Y, const int &p);
+void extractc(const arma::mat &X, arma::mat &Y);
+
+void extractdividec(const arma::mat &X, arma::mat &Y);
 
 void updatec(arma::mat &X, const arma::mat &Y, const int &p);
 
