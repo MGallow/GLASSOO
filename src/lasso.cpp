@@ -18,7 +18,7 @@ using namespace Rcpp;
 //' \url{https://mgallow.github.io/GLASSOO/}.
 //'
 //' @param XX crossproduct of nxp data matrix.
-//' @param XY crossproduc of nxp data matrix and nxr matrix of response values.
+//' @param XY crossproduct of nxp data matrix and nx1 matrix of response values.
 //' @param initB initialization for beta regression coefficients.
 //' @param lam tuning parameter for lasso regularization term. Defaults to \code{lam = 0.1}.
 //' @param crit criterion for convergence. Criterion \code{loss} will loop until the relative change in the objective for each response after an iteration is less than \code{tol}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol} times tolerance multiple. Defaults to \code{loss}.
@@ -47,95 +47,101 @@ using namespace Rcpp;
 //' @export
 //'
 // [[Rcpp::export]]
-List lassoc(const arma::mat &XX, const arma::mat &XY, const arma::mat &initB, const arma::mat &initH, const double lam = 0.1, std::string crit = "loss", const double tol = 1e-4, const double maxit = 1e4){
+List lassoc(const arma::mat &XX, const arma::mat &XY, const arma::colvec &initB, const arma::colvec &initH, const double lam = 0.1, std::string crit = "loss", const double tol = 1e-4, const double maxit = 1e4){
   
   // allocate memory
-  int P = XX.n_cols, R = XY.n_cols, iter;
-  double temp = 0, loss2 = 0, loss = 0;
-  bool criterion = true;
-  arma::mat B(initB), B2(initB), H(initH), H2(initH), maxes, mult;
-  maxes = arma::max(arma::abs(XY), 0);
-  mult = arma::sum(arma::abs(XY.each_col()/XX.diag()), 0);
-  
-  
-  // loop over all responses
-  for (int r = 0; r < R; r++){
+  bool criterion = true, check = true;
+  int P = XX.n_cols, iter = 0;
+  double max, mult, temp = 0, loss2 = 0, loss = 0;
+  arma::mat B(initB), B2(initB), H(initH), H2(initH), maxes;
+  maxes = arma::abs(XY);
+  max = 2*lam - maxes.max();
+  mult = arma::accu(arma::abs(XY/XX.diag()));
+
+  // loop until convergence
+  while (criterion && (iter < maxit)){
     
-    // for each response, loop until convergence
-    iter = 0; criterion = true;
-    while (criterion && (iter < maxit)){
-      
-      // update values
-      iter++;
-      B = B2;
-      loss = loss2;
-      
-      // loop over all rows in column r of beta
-      for (int p = 0; p < P; p++){
-        if (lam > maxes(r)){
-          
-          // set each entry in column r equal to zero if lam > max(XY)
-          B2(p, r) = 0;
-          
-        } else {
-          
-          // otherwise update betas by soft thresholding
-          B2(p, r) = softc(XY(p, r) - H2(p, r), lam)/XX(p, p);
-          
-        }
+    // update values
+    iter++;
+    B = B2;
+    loss = loss2;
+    
+    // loop over all rows in column r of beta
+    for (int p = 0; p < P; p++){
+      if ((max > maxes(p)) && check){
         
-        // if updated beta is different, update H matrix
-        if (B2(p, r) != B(p, r)){
-          
-          // update each element in column r of H, except p
-          temp = 0;
-          H = H2;
-          for (int p_ = 0; p_ < P; p_++){
-            if (p_ != p){
-              
-              // update all rows except row p
-              H2(p_, r) -= XX(p_, p)*(B(p, r) - B2(p, r));
-              
-              // create temporary sum used in loss function, if necessary
-              if (crit == "loss"){
-                temp += B2(p_, r)*XX(p_, p);
-                
-              }
-            }
-          }
-          
-          // update loss, if necessary
-          if (crit == "loss"){
-            loss2 += (B(p, r) - B2(p, r))*(XY(p, r) - temp) + (std::pow(B2(p, r), 2) - std::pow(B(p, r), 2))*XX(p, p)/2 + lam*(std::abs(B2(p, r)) - std::abs(B(p, r)));
-            
-          }
-        }
-      }
-      
-      // stopping criterion
-      if (crit == "loss"){
-        
-        // compute loss improvement
-        criterion = (std::abs((loss2 - loss)/loss) > tol);
-        
-      } else if (crit == "avg") {
-        
-        // compute estimate avg change
-        criterion = (arma::mean(arma::abs(B2.col(r) - B.col(r))) > tol*mult(r));
+        // set entry equal to zero if fails STRONG rules for lasso
+        B2[p] = 0;
         
       } else {
         
-        // compute estimate max change
-        criterion = (arma::abs(B2.col(r) - B.col(r)).max() > tol*mult(r));
+        // otherwise update betas by soft thresholding
+        B2[p] = softc(XY[p] - H2[p], lam)/XX(p, p);
         
       }
       
-      // R_CheckUserInterrupt
-      if (iter % 1000 == 0){
-        R_CheckUserInterrupt();
+      // if updated beta is different, update H matrix
+      if (B2[p] != B[p]){
+        
+        // update each element in column r of H, except p
+        temp = 0;
+        H = H2;
+        for (int p_ = 0; p_ < P; p_++){
+          if (p_ != p){
+            
+            // update all rows except row p
+            H2[p_] -= XX(p_, p)*(B[p] - B2[p]);
+            
+            // create temporary sum used in loss function, if necessary
+            if (crit == "loss"){
+              temp += B2[p_]*XX(p_, p);
+              
+            }
+          }
+        }
+        
+        // update loss, if necessary
+        if (crit == "loss"){
+          loss2 += (B[p] - B2[p])*(XY[p] - temp) + (std::pow(B2[p], 2) - std::pow(B[p], 2))*XX(p, p)/2 + lam*(std::abs(B2[p]) - std::abs(B[p]));
+          
+        }
       }
+    }
+    
+    // stopping criterion
+    if (crit == "loss"){
+      
+      // compute loss improvement
+      criterion = (std::abs((loss2 - loss)/loss) > tol);
+      
+    } else if (crit == "avg") {
+      
+      // compute estimate avg change
+      criterion = (arma::accu(arma::abs(B2 - B)) > tol*mult);
+      
+    } else {
+      
+      // compute estimate max change
+      criterion = (arma::abs(B2 - B).max() > tol*mult/P);
       
     }
+    
+    // R_CheckUserInterrupt
+    if (iter % 1000 == 0){
+      R_CheckUserInterrupt();
+    }
+    
+    // check KKT conditions for STRONG rule
+    if (!criterion){
+      if (arma::any(arma::vectorise(arma::abs(-XY + XX*B2 + lam*arma::sign(B2))) > 1)){
+        
+        // if true, then recalculate with check = false
+        criterion = true;
+        check = false;
+        
+      }
+    }
+    
   }
   
   return List::create(Named("Iterations") = iter,
