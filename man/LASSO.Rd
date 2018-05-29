@@ -5,7 +5,7 @@
 \title{Lasso Regression (c++)}
 \usage{
 LASSO(X, Y, lam = 0.1, crit = c("loss", "avg", "max"), tol = 1e-04,
-  maxit = 10000, ind = matrix(1, ncol(X), ncol(Y)))
+  maxit = 10000)
 }
 \arguments{
 \item{X}{nxp data matrix.}
@@ -19,8 +19,6 @@ LASSO(X, Y, lam = 0.1, crit = c("loss", "avg", "max"), tol = 1e-04,
 \item{tol}{tolerance for algorithm convergence. Defaults to 1e-4..}
 
 \item{maxit}{maximum iterations. Defaults to 1e4}
-
-\item{ind}{optional matrix specifying which coefficients will be penalized.}
 }
 \value{
 returns list of returns which includes:

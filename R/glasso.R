@@ -98,10 +98,10 @@
 GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01, 
     lam = NULL, diagonal = FALSE, path = FALSE, crit.out = c("avg", 
         "max"), crit.in = c("loss", "avg", "max"), tol.out = 1e-04, 
-    tol.in = 1e-04, maxit.out = 10000, maxit.in = 10000, 
-    adjmaxit.out = NULL, K = 5, crit.cv = c("loglik", "AIC", 
-        "BIC"), start = c("warm", "cold"), cores = 1, trace = c("progress", 
-        "print", "none")) {
+    tol.in = 1e-04, maxit.out = 10000, maxit.in = 10000, adjmaxit.out = NULL, 
+    K = 5, crit.cv = c("loglik", "AIC", "BIC"), start = c("warm", 
+        "cold"), cores = 1, trace = c("progress", "print", 
+        "none")) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -201,12 +201,11 @@ GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
             if (is.null(X)) {
                 X = matrix(0)
             }
-            GLASSO = CV_GLASSOc(X = X, S = S, lam = lam, 
-                diagonal = diagonal, path = path, crit_out = crit.out, 
-                crit_in = crit.in, tol_out = tol.out, tol_in = tol.in, 
-                maxit_out = maxit.out, maxit_in = maxit.in, 
-                adjmaxit_out = adjmaxit.out, K = K, crit_cv = crit.cv, 
-                start = start, trace = trace)
+            GLASSO = CV_GLASSOc(X = X, S = S, lam = lam, diagonal = diagonal, 
+                path = path, crit_out = crit.out, crit_in = crit.in, 
+                tol_out = tol.out, tol_in = tol.in, maxit_out = maxit.out, 
+                maxit_in = maxit.in, adjmaxit_out = adjmaxit.out, 
+                K = K, crit_cv = crit.cv, start = start, trace = trace)
             MIN.error = GLASSO$min.error
             AVG.error = GLASSO$avg.error
             CV.error = GLASSO$cv.error
@@ -223,8 +222,8 @@ GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
         # specify initial estimate for Sigma
         if (diagonal) {
             
-            # simply force init to be positive definite final
-            # diagonal elements will be increased by lam
+            # simply force init to be positive definite final diagonal
+            # elements will be increased by lam
             init = S + GLASSO$lam
             
         } else {
@@ -254,8 +253,8 @@ GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
         # specify initial estimate for Sigma
         if (diagonal) {
             
-            # simply force init to be positive definite final
-            # diagonal elements will be increased by lam
+            # simply force init to be positive definite final diagonal
+            # elements will be increased by lam
             init = S + lam
             
         } else {

@@ -125,7 +125,6 @@ GLASSOc <- function(S, initSigma, initOmega, lam, crit_out = "avg", crit_in = "l
 #' @param XX crossproduct of nxp data matrix.
 #' @param XY crossproduc of nxp data matrix and nxr matrix of response values.
 #' @param initB initialization for beta regression coefficients.
-#' @param ind optional matrix specifying which coefficients will be penalized.
 #' @param lam tuning parameter for lasso regularization term. Defaults to \code{lam = 0.1}.
 #' @param crit criterion for convergence. Criterion \code{loss} will loop until the relative change in the objective for each response after an iteration is less than \code{tol}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol} times tolerance multiple. Defaults to \code{loss}.
 #' @param tol tolerance for algorithm convergence. Defaults to 1e-4.
@@ -153,7 +152,7 @@ NULL
 #' 
 #' @export
 #'
-lassoc <- function(XX, XY, initB, initH, ind, lam = 0.1, crit = "loss", tol = 1e-4, maxit = 1e4) {
-    .Call('_GLASSOO_lassoc', PACKAGE = 'GLASSOO', XX, XY, initB, initH, ind, lam, crit, tol, maxit)
+lassoc <- function(XX, XY, initB, initH, lam = 0.1, crit = "loss", tol = 1e-4, maxit = 1e4) {
+    .Call('_GLASSOO_lassoc', PACKAGE = 'GLASSOO', XX, XY, initB, initH, lam, crit, tol, maxit)
 }
 

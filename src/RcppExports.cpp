@@ -78,8 +78,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // lassoc
-List lassoc(const arma::mat& XX, const arma::mat& XY, const arma::mat& initB, const arma::mat& initH, const arma::mat& ind, const double lam, std::string crit, const double tol, const double maxit);
-RcppExport SEXP _GLASSOO_lassoc(SEXP XXSEXP, SEXP XYSEXP, SEXP initBSEXP, SEXP initHSEXP, SEXP indSEXP, SEXP lamSEXP, SEXP critSEXP, SEXP tolSEXP, SEXP maxitSEXP) {
+List lassoc(const arma::mat& XX, const arma::mat& XY, const arma::mat& initB, const arma::mat& initH, const double lam, std::string crit, const double tol, const double maxit);
+RcppExport SEXP _GLASSOO_lassoc(SEXP XXSEXP, SEXP XYSEXP, SEXP initBSEXP, SEXP initHSEXP, SEXP lamSEXP, SEXP critSEXP, SEXP tolSEXP, SEXP maxitSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -87,12 +87,11 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type XY(XYSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type initB(initBSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type initH(initHSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type ind(indSEXP);
     Rcpp::traits::input_parameter< const double >::type lam(lamSEXP);
     Rcpp::traits::input_parameter< std::string >::type crit(critSEXP);
     Rcpp::traits::input_parameter< const double >::type tol(tolSEXP);
     Rcpp::traits::input_parameter< const double >::type maxit(maxitSEXP);
-    rcpp_result_gen = Rcpp::wrap(lassoc(XX, XY, initB, initH, ind, lam, crit, tol, maxit));
+    rcpp_result_gen = Rcpp::wrap(lassoc(XX, XY, initB, initH, lam, crit, tol, maxit));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -101,7 +100,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_GLASSOO_CV_GLASSOc", (DL_FUNC) &_GLASSOO_CV_GLASSOc, 16},
     {"_GLASSOO_CVP_GLASSOc", (DL_FUNC) &_GLASSOO_CVP_GLASSOc, 15},
     {"_GLASSOO_GLASSOc", (DL_FUNC) &_GLASSOO_GLASSOc, 10},
-    {"_GLASSOO_lassoc", (DL_FUNC) &_GLASSOO_lassoc, 9},
+    {"_GLASSOO_lassoc", (DL_FUNC) &_GLASSOO_lassoc, 8},
     {NULL, NULL, 0}
 };
 

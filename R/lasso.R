@@ -15,7 +15,6 @@
 #' @param crit criterion for convergence. Criterion \code{loss} will loop until the relative change in the objective for each response after an iteration is less than \code{tol}. Criterion \code{avg} will loop until the average absolute change for each response is less than \code{tol} times tolerance multiple. Similary, criterion \code{max} will loop until the maximum absolute change is less than \code{tol} times tolerance multiple. Defaults to \code{loss}.
 #' @param tol tolerance for algorithm convergence. Defaults to 1e-4..
 #' @param maxit maximum iterations. Defaults to 1e4
-#' @param ind optional matrix specifying which coefficients will be penalized.
 #' 
 #' @return returns list of returns which includes:
 #' \item{Call}{function call.}
@@ -40,8 +39,7 @@
 
 # we define the lasso function
 LASSO = function(X, Y, lam = 0.1, crit = c("loss", "avg", 
-    "max"), tol = 1e-04, maxit = 10000, ind = matrix(1, ncol(X), 
-    ncol(Y))) {
+    "max"), tol = 1e-04, maxit = 10000) {
     
     # checks
     if (is.null(X) || is.null(Y)) {
@@ -71,12 +69,12 @@ LASSO = function(X, Y, lam = 0.1, crit = c("loss", "avg",
     # execute lassoc
     init = matrix(0, nrow = ncol(X), ncol = ncol(Y))
     LASSO = lassoc(XX = XX, XY = XY, initB = init, initH = init, 
-        ind = ind, lam = lam, crit = crit, tol = tol, maxit = maxit)
+        lam = lam, crit = crit, tol = tol, maxit = maxit)
     
     
     # compute loss
     loss = sum((Y - X %*% LASSO$Coefficients)^2)/2 + lam * 
-        sum(abs(ind * LASSO$Coefficients))
+        sum(abs(LASSO$Coefficients))
     
     returns = list(Call = call, Iterations = LASSO$Iterations, 
         Loss = loss, Coefficients = LASSO$Coefficients)
