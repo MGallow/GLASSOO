@@ -48,7 +48,7 @@ list of returns includes:
 \item{path}{array containing the solution path. Solutions will be ordered by ascending lambda values.}
 \item{min.error}{minimum average cross validation error (cv.crit) for optimal parameters.}
 \item{avg.error}{average cross validation error (cv.crit) across all folds.}
-\item{cv.error}{cross validation errors (cv.crit).}//'
+\item{cv.error}{cross validation errors (cv.crit).}
 }
 \description{
 Cross validation function for GLASSO.

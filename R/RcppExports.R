@@ -34,7 +34,7 @@ NULL
 #' \item{path}{array containing the solution path. Solutions will be ordered by ascending lambda values.}
 #' \item{min.error}{minimum average cross validation error (cv.crit) for optimal parameters.}
 #' \item{avg.error}{average cross validation error (cv.crit) across all folds.}
-#' \item{cv.error}{cross validation errors (cv.crit).}//' 
+#' \item{cv.error}{cross validation errors (cv.crit).}
 #' @keywords internal
 #'
 CV_GLASSOc <- function(X, S, lam, diagonal = FALSE, path = FALSE, crit_out = "avg", crit_in = "loss", tol_out = 1e-4, tol_in = 1e-4, maxit_out = 1e4L, maxit_in = 1e4L, adjmaxit_out = 1e4L, K = 5L, crit_cv = "loglik", start = "warm", trace = "progress") {

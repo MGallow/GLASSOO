@@ -98,10 +98,10 @@
 GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01, 
     lam = NULL, diagonal = FALSE, path = FALSE, crit.out = c("avg", 
         "max"), crit.in = c("loss", "avg", "max"), tol.out = 1e-04, 
-    tol.in = 1e-04, maxit.out = 10000, maxit.in = 10000, adjmaxit.out = NULL, 
-    K = 5, crit.cv = c("loglik", "AIC", "BIC"), start = c("warm", 
-        "cold"), cores = 1, trace = c("progress", "print", 
-        "none")) {
+    tol.in = 1e-04, maxit.out = 10000, maxit.in = 10000, 
+    adjmaxit.out = NULL, K = 5, crit.cv = c("loglik", "AIC", 
+        "BIC"), start = c("warm", "cold"), cores = 1, trace = c("progress", 
+        "print", "none")) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -146,7 +146,6 @@ GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
     start = match.arg(start)
     trace = match.arg(trace)
     call = match.call()
-    call = match.call()
     MIN.error = AVG.error = CV.error = NULL
     n = ifelse(is.null(X), nrow(S), nrow(X))
     
@@ -190,8 +189,8 @@ GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
             GLASSO = CVP_GLASSO(X = X, lam = lam, diagonal = diagonal, 
                 crit.out = crit.out, crit.in = crit.in, tol.out = tol.out, 
                 tol.in = tol.in, maxit.out = maxit.out, maxit.in = maxit.in, 
-                adjmaxit.out = adjmaxit.out, crit.cv = crit.cv, 
-                K = K, start = start, cores = cores, trace = trace)
+                adjmaxit.out = adjmaxit.out, K = K, crit.cv = crit.cv, 
+                start = start, cores = cores, trace = trace)
             MIN.error = GLASSO$min.error
             AVG.error = GLASSO$avg.error
             CV.error = GLASSO$cv.error
@@ -202,11 +201,12 @@ GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
             if (is.null(X)) {
                 X = matrix(0)
             }
-            GLASSO = CV_GLASSOc(X = X, S = S, lam = lam, diagonal = diagonal, 
-                path = path, crit_out = crit.out, crit_in = crit.in, 
-                tol_out = tol.out, tol_in = tol.in, maxit_out = maxit.out, 
-                maxit_in = maxit.in, adjmaxit_out = adjmaxit.out, 
-                K = K, start = start, crit_cv = crit.cv, trace = trace)
+            GLASSO = CV_GLASSOc(X = X, S = S, lam = lam, 
+                diagonal = diagonal, path = path, crit_out = crit.out, 
+                crit_in = crit.in, tol_out = tol.out, tol_in = tol.in, 
+                maxit_out = maxit.out, maxit_in = maxit.in, 
+                adjmaxit_out = adjmaxit.out, K = K, crit_cv = crit.cv, 
+                start = start, trace = trace)
             MIN.error = GLASSO$min.error
             AVG.error = GLASSO$avg.error
             CV.error = GLASSO$cv.error
@@ -215,16 +215,16 @@ GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
         }
         
         # print warning if lam on boundary
-        if ((GLASSO$lam == lam[1]) && ((length(lam) != 1) && 
-            (!path))) {
+        if ((GLASSO$lam == lam[1]) && (length(lam) != 1) && 
+            !path) {
             print("Optimal tuning parameter on boundary... consider providing a smaller lam value or decreasing lam.min.ratio!")
         }
         
         # specify initial estimate for Sigma
         if (diagonal) {
             
-            # simply force init to be positive definite final diagonal
-            # elements will be increased by lam
+            # simply force init to be positive definite final
+            # diagonal elements will be increased by lam
             init = S + GLASSO$lam
             
         } else {
@@ -254,8 +254,8 @@ GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
         # specify initial estimate for Sigma
         if (diagonal) {
             
-            # simply force init to be positive definite final diagonal
-            # elements will be increased by lam
+            # simply force init to be positive definite final
+            # diagonal elements will be increased by lam
             init = S + lam
             
         } else {
@@ -283,7 +283,6 @@ GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
     }
     
     # compute penalized loglik
-    n = ifelse(is.null(X), nrow(S), nrow(X))
     loglik = (-n/2) * (sum(GLASSO$Omega * S) - determinant(GLASSO$Omega, 
         logarithm = TRUE)$modulus[1] + GLASSO$lam * sum(abs(C * 
         GLASSO$Omega)))

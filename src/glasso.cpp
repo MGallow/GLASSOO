@@ -58,10 +58,9 @@ List GLASSOc(const arma::mat &S, const arma::mat &initSigma, const arma::mat &in
   
   // allocate memory
   bool criterion = true;
-  int P = S.n_cols, iter = 0;
-  double mult;
+  int P = S.n_cols, iter = 0; double mult;
   arma::mat Sigmatemp(P - 1, P - 1, arma::fill::zeros), Stemp, Omegatemp(P, 1, arma::fill::zeros), ind(P - 1, 1, arma::fill::ones);
-  arma::mat maxes, Beta, Betas, Stemps, zeros, H, Omega(P, P, arma::fill::eye), Sigma(initSigma), Sigma2(initSigma), Sminus(S);
+  arma::mat maxes, Beta, Betas, Stemps, zeros, H, Omega(initOmega), Sigma(initSigma), Sigma2(initSigma), Sminus(S);
   Beta = zeros = Stemp = arma::zeros<arma::mat>(P - 1, 1);
   Betas = Stemps = H = arma::zeros<arma::mat>(P - 1, P);
   Sminus -= arma::diagmat(Sminus);

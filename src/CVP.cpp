@@ -40,7 +40,7 @@ arma::mat CVP_GLASSOc(const int n, const arma::mat &S_train, const arma::mat &S_
   // initialization
   int p = S_train.n_rows, l = lam.n_rows;
   double sgn = 0, logdet = 0, lam_, alpha;
-  arma::mat Omega, initOmega(p, p, arma::fill::eye), Sigma, initSigma(S_train), CV_error(l, 1, arma::fill::zeros);
+  arma::mat Omega, initOmega(p, p, arma::fill::eye), initSigma(S_train), CV_error(l, 1, arma::fill::zeros);
   Progress progress(l, trace == "progress");
   
   
@@ -48,12 +48,12 @@ arma::mat CVP_GLASSOc(const int n, const arma::mat &S_train, const arma::mat &S_
   if (!diagonal){
     
     // provide estimate that is pd and dual feasible
-    initSigma -=arma::diagmat(initSigma); initSigma = arma::abs(initSigma);
+    initSigma -= arma::diagmat(initSigma); initSigma = arma::abs(initSigma);
     alpha = lam[0]/initSigma.max();
     if (alpha >= 1){
       alpha = 1;
     }
-    initSigma = (1 - alpha)*initSigma;
+    initSigma = (1 - alpha)*S_train;
     initSigma.diag() = S_train.diag();
     
   }

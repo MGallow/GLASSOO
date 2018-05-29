@@ -66,7 +66,7 @@ arma::vec kfold(const int &n, const int &K){
 //' \item{path}{array containing the solution path. Solutions will be ordered by ascending lambda values.}
 //' \item{min.error}{minimum average cross validation error (cv.crit) for optimal parameters.}
 //' \item{avg.error}{average cross validation error (cv.crit) across all folds.}
-//' \item{cv.error}{cross validation errors (cv.crit).}//' 
+//' \item{cv.error}{cross validation errors (cv.crit).}
 //' @keywords internal
 //'
 // [[Rcpp::export]]
@@ -76,7 +76,7 @@ List CV_GLASSOc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam,
   int n, p = S.n_cols, l = lam.n_rows, initmaxit = maxit_out;
   double sgn = 0, logdet = 0, lam_, alpha;
   arma::mat X_train, X_test, S_train(S), S_test(S), initSigma(S), initOmega;
-  arma::mat Omega, Sigma, identity, CV_errors(l, K, arma::fill::zeros);
+  arma::mat Omega, identity, CV_errors(l, K, arma::fill::zeros);
   initOmega = identity = arma::eye<arma::mat>(p, p);
   arma::colvec CV_error, zerosl(l, arma::fill::zeros); arma::rowvec X_bar;
   arma::uvec index, index_; arma::vec folds; arma::cube Path;
@@ -87,7 +87,7 @@ List CV_GLASSOc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam,
   if (K == 1){
     
     // set sample size
-    n = initSigma.n_rows;
+    n = S.n_rows;
     
     // initialize Path, if necessary
     if (path){
@@ -139,7 +139,7 @@ List CV_GLASSOc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam,
       if (alpha >= 1){
         alpha = 1;
       }
-      initSigma = (1 - alpha)*initSigma;
+      initSigma = (1 - alpha)*S_train;
       initSigma.diag() = S_train.diag();
       
     }
