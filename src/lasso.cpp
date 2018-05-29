@@ -54,7 +54,7 @@ List lassoc(const arma::mat &XX, const arma::mat &XY, const arma::mat &initB, co
   double temp = 0, loss2 = 0, loss = 0;
   bool criterion = true;
   arma::mat B(initB), B2(initB), H(initH), H2(initH), maxes, mult;
-  maxes = arma::abs(arma::max(XY, 0));
+  maxes = arma::max(arma::abs(XY), 0);
   mult = arma::sum(arma::abs(XY.each_col()/XX.diag()), 0);
   
   

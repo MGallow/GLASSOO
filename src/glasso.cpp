@@ -69,7 +69,7 @@ List GLASSOc(const arma::mat &S, const arma::mat &initSigma, const arma::mat &in
   // initialize Betas and Stemps
   extractdividec(initOmega, Betas);
   extractc(S, Stemps);
-  maxes = arma::abs(arma::max(Stemps, 0));
+  maxes = arma::max(arma::abs(Stemps), 0);
   
   // loop until convergence
   while (criterion && (iter < maxit_out)){
@@ -100,10 +100,10 @@ List GLASSOc(const arma::mat &S, const arma::mat &initSigma, const arma::mat &in
         List LASSO = lassoc(Sigmatemp, Stemps.col(p), Betas.col(p), H, lam, crit_in, tol_in, maxit_in);
         Betas.col(p) = as<arma::mat>(LASSO["Coefficients"]);
         
-        // update Stemp = Sigma12
+        // update temp = Sigma12
         temp = Sigmatemp*Betas.col(p);
         
-        // update Sigma[-p, p] = Sigma[p, -p] = Stemp
+        // update Sigma[-p, p] = Sigma[p, -p] = temp
         updatec(Sigma2, temp, p);
         
       }
@@ -134,11 +134,11 @@ List GLASSOc(const arma::mat &S, const arma::mat &initSigma, const arma::mat &in
   extractc(Sigma2, Stemps);
   for (int p = 0; p < P; p++){
     
-    // update Omega[p, p] and Omegatemp = Omega12
+    // update Omega[p, p] and temp = Omega12
     Omega(p, p) = 1/(Sigma2(p, p) - arma::accu(Stemps.col(p) % Betas.col(p)));
     temp = -Omega(p, p)*Betas.col(p);
     
-    // set Omega[-p, p] = Omega[p, -p] = Omegatemp
+    // set Omega[-p, p] = Omega[p, -p] = temp
     updatec(Omega, temp, p);
     
   }

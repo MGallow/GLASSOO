@@ -154,6 +154,9 @@ GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
         S = (nrow(X) - 1)/nrow(X) * cov(X)
     }
     
+    Sminus = S
+    diag(Sminus) = 0
+    
     # compute grid of lam values, if necessary
     if (is.null(lam)) {
         if (!((lam.min.ratio <= 1) && (lam.min.ratio > 0))) {
@@ -166,7 +169,7 @@ GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
         }
         
         # calculate lam.max and lam.min
-        lam.max = max(abs(S - diag(S)))
+        lam.max = max(abs(Sminus))
         lam.min = lam.min.ratio * lam.max
         
         # calculate grid of lambda values
@@ -229,8 +232,7 @@ GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
         } else {
             
             # provide estimate that is pd and dual feasible
-            alpha = min(c(GLASSO$lam/max(abs(S - diag(S))), 
-                1))
+            alpha = min(c(GLASSO$lam/max(abs(Sminus)), 1))
             init = (1 - alpha) * S
             diag(init) = diag(S)
             
@@ -260,7 +262,7 @@ GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
         } else {
             
             # provide estimate that is pd and dual feasible
-            alpha = min(c(lam/max(abs(S - diag(S))), 1))
+            alpha = min(c(lam/max(abs(Sminus)), 1))
             init = (1 - alpha) * S
             diag(init) = diag(S)
             
