@@ -179,7 +179,7 @@ List CV_GLASSOc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam,
         CV_error[i] += numzeros(Omega);
       }
       if (crit_cv == "BIC"){
-        CV_error[i] += numzeros(Omega)*log(n)/2;
+        CV_error[i] += numzeros(Omega)*std::log(n)/2;
       }
       
       // save estimate if path = TRUE

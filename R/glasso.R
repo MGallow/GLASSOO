@@ -40,7 +40,7 @@
 #' @param cores option to run CV in parallel. Defaults to \code{cores = 1}.
 #' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
 #' 
-#' @return returns class object \code{ADMMsigma} which includes:
+#' @return returns class object \code{GLASSOO} which includes:
 #' \item{Call}{function call.}
 #' \item{Iterations}{number of iterations}
 #' \item{Tuning}{optimal tuning parameters (lam and alpha).}
