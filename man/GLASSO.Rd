@@ -39,7 +39,7 @@ GLASSO(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
 
 \item{maxit.in}{maximum number of iterations for inner (lasso) loop. Defaults to 1e4.}
 
-\item{adjmaxit.out}{adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for 'one-step' estimators. Defaults to NULL.}
+\item{adjmaxit.out}{adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged. This option is intended to be paired with \code{warm} starts and allows for 'one-step' estimators. Defaults to NULL.}
 
 \item{K}{specify the number of folds for cross validation.}
 
@@ -52,7 +52,7 @@ GLASSO(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
 \item{trace}{option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.}
 }
 \value{
-returns class object \code{ADMMsigma} which includes:
+returns class object \code{GLASSOO} which includes:
 \item{Call}{function call.}
 \item{Iterations}{number of iterations}
 \item{Tuning}{optimal tuning parameters (lam and alpha).}
@@ -95,7 +95,8 @@ for (i in 1:5){
  }
  }
 
-# generate 100 x 5 matrix with rows drawn from iid N_p(0, S)
+# generate 100 x 5 matrix with rows drawn from iid N_p
+set.seed(123)
 Z = matrix(rnorm(100*5), nrow = 100, ncol = 5)
 out = eigen(S, symmetric = TRUE)
 S.sqrt = out$vectors \%*\% diag(out$values^0.5)

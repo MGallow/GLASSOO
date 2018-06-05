@@ -21,3 +21,4 @@ docs/GLASSOO_cache/latex/*.Rdata
 docs/GLASSOO_cache/markdown_github/*.rdb
 docs/GLASSOO_cache/markdown_github/*.rdx
 docs/GLASSOO_cache/markdown_github/*.Rdata
+inst/doc

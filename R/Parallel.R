@@ -47,11 +47,11 @@ CVP_GLASSO = function(X = NULL, lam = 10^seq(-2, 2, 0.2),
     # make cluster and register cluster
     num_cores = detectCores()
     if (cores > num_cores) {
-        print(paste("Only detected", num_cores, "cores...", 
+        cat("\nOnly detected", paste(num_cores, "cores...", 
             sep = " "))
     }
     if (cores > K) {
-        print("Number of cores exceeds K... setting cores = K")
+        cat("\nNumber of cores exceeds K... setting cores = K")
         cores = K
     }
     
@@ -100,7 +100,7 @@ CVP_GLASSO = function(X = NULL, lam = 10^seq(-2, 2, 0.2),
     # stop cluster
     stopCluster(cluster)
     
-    # return best lam and alpha values
+    # return best lam values
     return(list(lam = best_lam, min.error = error, avg.error = AVG, 
         cv.error = CV))
     

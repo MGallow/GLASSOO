@@ -1,0 +1,8 @@
+pandoc: 2.2.1
+pkgdown: 1.0.0
+pkgdown_sha: ~
+articles: {}
+urls:
+  reference: https://mgallow.github.io/GLASSOO//reference
+  article: https://mgallow.github.io/GLASSOO//articles
+

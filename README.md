@@ -1,26 +1,24 @@
 GLASSOO
 ================
 
-See [manual](https://github.com/MGallow/GLASSO/blob/master/GLASSOO.pdf).
+[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/GLASSOO)](https://cran.r-project.org/package=GLASSOO)
 
-Overview
---------
+## Overview
 
-<br>
+`GLASSO` is an R package that estimates a penalized precision matrix via
+block-wise coordinate descent – also known as the graphical lasso
+(glasso) algorithm. A (possibly incomplete) list of functions contained
+in the package can be found below:
 
-<p align="center">
-<img src="lik.gif">
-</p>
-<br>
+  - `GLASSO()` computes the estimated precision matrix
 
-`GLASSO` is an R package that estimates a penalized precision matrix via block-wise coordinate descent -- also known as the graphical lasso (glasso) algorithm. A (possibly incomplete) list of functions contained in the package can be found below:
+  - `plot.GLASSO()` produces a heat map or line graph for cross
+    validation errors
 
--   `GLASSO()` computes the estimated precision matrix
+See [vignette](https://mgallow.github.io/GLASSOO/) or
+[manual](https://github.com/MGallow/GLASSOO/blob/master/GLASSOO.pdf).
 
--   `plot.GLASSO()` produces a heat map or line graph for cross validation errors
-
-Installation
-------------
+## Installation
 
 ``` r
 # The easiest way to install is from GitHub:
@@ -28,10 +26,12 @@ Installation
 devtools::install_github("MGallow/GLASSOO")
 ```
 
-If there are any issues/bugs, please let me know: [github](https://github.com/MGallow/GLASSOO/issues). You can also contact me via my [website](http://users.stat.umn.edu/~gall0441/). Pull requests are welcome!
+If there are any issues/bugs, please let me know:
+[github](https://github.com/MGallow/GLASSOO/issues). You can also
+contact me via my [website](http://users.stat.umn.edu/~gall0441/). Pull
+requests are welcome\!
 
-Usage
------
+## Usage
 
 ``` r
 library(GLASSOO)
@@ -46,7 +46,7 @@ for (i in 1:5){
 }
 
 # print oracle precision matrix (shrinkage might be useful)
-(Omega = qr.solve(S) %>% round(3))
+(Omega = round(qr.solve(S), 3))
 ```
 
     ##        [,1]   [,2]   [,3]   [,4]   [,5]
@@ -57,7 +57,8 @@ for (i in 1:5){
     ## [5,]  0.000  0.000  0.000 -1.373  1.961
 
 ``` r
-# generate 1000 x 5 matrix with rows drawn from iid N_p(0, S)
+# generate 100 x 5 matrix with rows drawn from iid N_p(0, S)
+set.seed(123)
 Z = matrix(rnorm(100*5), nrow = 100, ncol = 5)
 out = eigen(S, symmetric = TRUE)
 S.sqrt = out$vectors %*% diag(out$values^0.5) %*% t(out$vectors)
@@ -67,15 +68,15 @@ X = Z %*% S.sqrt
 Sample = (nrow(X) - 1)/nrow(X)*cov(X)
 
 # print sample precision matrix (perhaps a bad estimate)
-(qr.solve(cov(X)) %>% round(5))
+round(qr.solve(cov(X)), 5)
 ```
 
     ##          [,1]     [,2]     [,3]     [,4]     [,5]
-    ## [1,]  1.77452 -1.52421  0.00896  0.25383  0.01418
-    ## [2,] -1.52421  3.46629 -1.41101 -0.08099 -0.31840
-    ## [3,]  0.00896 -1.41101  2.79597 -1.11710  0.17526
-    ## [4,]  0.25383 -0.08099 -1.11710  2.77327 -1.75156
-    ## [5,]  0.01418 -0.31840  0.17526 -1.75156  2.73721
+    ## [1,]  2.30646 -1.53483  0.21884 -0.08521  0.24066
+    ## [2,] -1.53483  3.24286 -1.66346 -0.14134  0.18760
+    ## [3,]  0.21884 -1.66346  3.16698 -1.23906 -0.10906
+    ## [4,] -0.08521 -0.14134 -1.23906  2.74022 -1.35853
+    ## [5,]  0.24066  0.18760 -0.10906 -1.35853  2.03323
 
 ``` r
 # GLASSO (lam = 0.5)
@@ -92,19 +93,19 @@ GLASSO(S = Sample, lam = 0.5)
     ##       log10(lam)  lam
     ## [1,]      -0.301  0.5
     ## 
-    ## Log-likelihood: -10.89827
+    ## Log-likelihood: -10.44936
     ## 
     ## Omega:
     ##          [,1]     [,2]     [,3]     [,4]     [,5]
-    ## [1,]  0.93879 -0.17857  0.00000  0.00000  0.00000
-    ## [2,] -0.17857  1.23551 -0.07325  0.00000  0.00000
-    ## [3,]  0.00000 -0.07325  1.22391 -0.04095  0.00000
-    ## [4,]  0.00000  0.00000 -0.04095  1.06546 -0.16866
-    ## [5,]  0.00000  0.00000  0.00000 -0.16866  1.32332
+    ## [1,]  1.34080 -0.00973  0.00000  0.00000  0.00000
+    ## [2,] -0.00973  1.19263 -0.09615  0.00000  0.00000
+    ## [3,]  0.00000 -0.09615  1.21895 -0.11424  0.00000
+    ## [4,]  0.00000  0.00000 -0.11424  1.06968 -0.13534
+    ## [5,]  0.00000  0.00000  0.00000 -0.13534  1.12473
 
 ``` r
 # GLASSO cross validation
-GLASSO(X)
+(GLASSO = GLASSO(X))
 ```
 
     ## 
@@ -115,29 +116,28 @@ GLASSO(X)
     ## 
     ## Tuning parameter:
     ##       log10(lam)    lam
-    ## [1,]      -1.737  0.018
+    ## [1,]      -1.544  0.029
     ## 
-    ## Log-likelihood: -108.65963
+    ## Log-likelihood: -110.16675
     ## 
     ## Omega:
     ##          [,1]     [,2]     [,3]     [,4]     [,5]
-    ## [1,]  1.67594 -1.35403  0.00000  0.16188  0.00000
-    ## [2,] -1.35403  3.15010 -1.27590 -0.08024 -0.20431
-    ## [3,]  0.00000 -1.27590  2.63011 -0.93647  0.00000
-    ## [4,]  0.16188 -0.08024 -0.93647  2.51894 -1.55285
-    ## [5,]  0.00000 -0.20431  0.00000 -1.55285  2.58649
-
-``` r
-# produce CV heat map for GLASSO
-GLASSO = GLASSO(X)
-GLASSO %>% plot
-```
-
-![](README_files/figure-markdown_github/unnamed-chunk-2-1.png)
+    ## [1,]  2.13226 -1.24669  0.00000  0.00000  0.18709
+    ## [2,] -1.24669  2.75122 -1.29912 -0.07341  0.00000
+    ## [3,]  0.00000 -1.29912  2.81744 -1.15682 -0.00113
+    ## [4,]  0.00000 -0.07341 -1.15682  2.46461 -1.17086
+    ## [5,]  0.18709  0.00000 -0.00113 -1.17086  1.86326
 
 ``` r
 # produce line graph for CV errors for GLASSO
-GLASSO %>% plot(type = "heatmap")
+plot(GLASSO)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-2-2.png)
+![](README_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+
+``` r
+# produce CV heat map for GLASSO
+plot(GLASSO, type = "heatmap")
+```
+
+![](README_files/figure-gfm/unnamed-chunk-2-2.png)<!-- -->

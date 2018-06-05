@@ -33,7 +33,7 @@
 #' @param tol.in convergence tolerance for inner (lasso) loop. Defaults to 1e-4.
 #' @param maxit.out maximum number of iterations for outer (blockwise) loop. Defaults to 1e4.
 #' @param maxit.in maximum number of iterations for inner (lasso) loop. Defaults to 1e4.
-#' @param adjmaxit.out adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for 'one-step' estimators. Defaults to NULL.
+#' @param adjmaxit.out adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged. This option is intended to be paired with \code{warm} starts and allows for 'one-step' estimators. Defaults to NULL.
 #' @param K specify the number of folds for cross validation.
 #' @param crit.cv cross validation criterion (\code{loglik}, \code{AIC}, or \code{BIC}). Defaults to \code{loglik}.
 #' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
@@ -83,7 +83,8 @@
 #'  }
 #'  }
 #'
-#' # generate 100 x 5 matrix with rows drawn from iid N_p(0, S)
+#' # generate 100 x 5 matrix with rows drawn from iid N_p
+#' set.seed(123)
 #' Z = matrix(rnorm(100*5), nrow = 100, ncol = 5)
 #' out = eigen(S, symmetric = TRUE)
 #' S.sqrt = out$vectors %*% diag(out$values^0.5)
@@ -127,12 +128,12 @@ GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
         stop("Number of cores must be positive!")
     }
     if (cores > 1 && path) {
-        print("Parallelization not possible when producing solution path. Setting cores = 1...")
+        cat("\nParallelization not possible when producing solution path. Setting cores = 1...")
         cores = 1
     }
     K = ifelse(path, 1, K)
     if (cores > K) {
-        print("Number of cores exceeds K... setting cores = K")
+        cat("\nNumber of cores exceeds K... setting cores = K")
         cores = K
     }
     if (is.null(adjmaxit.out)) {
@@ -160,11 +161,11 @@ GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
     # compute grid of lam values, if necessary
     if (is.null(lam)) {
         if (!((lam.min.ratio <= 1) && (lam.min.ratio > 0))) {
-            print("lam.min.ratio must be in (0, 1]... setting to 1e-2!")
+            cat("\nlam.min.ratio must be in (0, 1]... setting to 1e-2!")
             lam.min.ratio = 0.01
         }
         if (!((nlam > 0) && (nlam%%1 == 0))) {
-            print("nlam must be a positive integer... setting to 10!")
+            cat("\nnlam must be a positive integer... setting to 10!")
             nlam = 10
         }
         
@@ -219,7 +220,7 @@ GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
         # print warning if lam on boundary
         if ((GLASSO$lam == lam[1]) && (length(lam) != 1) && 
             !path) {
-            print("Optimal tuning parameter on boundary... consider providing a smaller lam value or decreasing lam.min.ratio!")
+            cat("\nOptimal tuning parameter on boundary... consider providing a smaller lam value or decreasing lam.min.ratio!")
         }
         
         # specify initial estimate for Sigma
@@ -326,7 +327,7 @@ print.GLASSO = function(x, ...) {
     
     # print warning if maxit reached
     if (x$maxit.out <= x$Iterations) {
-        print("Maximum iterations reached...!")
+        cat("\nMaximum iterations reached...!")
     }
     
     # print call
@@ -380,6 +381,7 @@ print.GLASSO = function(x, ...) {
 #'  }
 #'
 #' # generate 100 x 5 matrix with rows drawn from iid N_p(0, S)
+#' set.seed(123)
 #' Z = matrix(rnorm(100*5), nrow = 100, ncol = 5)
 #' out = eigen(S, symmetric = TRUE)
 #' S.sqrt = out$vectors %*% diag(out$values^0.5)
@@ -390,7 +392,7 @@ print.GLASSO = function(x, ...) {
 #' plot(GLASSO(X))
 #' 
 #' # produce CV heat map for GLASSO
-#' plot(GLASSO(X), type = 'heatmap)
+#' plot(GLASSO(X), type = 'heatmap')
 
 plot.GLASSO = function(x, type = c("line", "heatmap"), footnote = TRUE, 
     ...) {
