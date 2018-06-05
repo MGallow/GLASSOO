@@ -32,7 +32,7 @@ CV_GLASSOc(X, S, lam, diagonal = FALSE, path = FALSE, crit_out = "avg",
 
 \item{maxit_in}{maximum number of iterations for inner (lasso) loop. Defaults to 1e4.}
 
-\item{adjmaxit_out}{adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for 'one-step' estimators. Defaults to 1e4.}
+\item{adjmaxit_out}{adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for "one-step" estimators. Defaults to 1e4.}
 
 \item{K}{specify the number of folds for cross validation.}
 

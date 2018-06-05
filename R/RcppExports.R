@@ -150,8 +150,6 @@ NULL
 #' @author Matt Galloway \email{gall0441@@umn.edu}
 #' 
 #' @keywords internal
-#' 
-#' @export
 #'
 lassoc <- function(XX, XY, initB, initH, lam = 0.1, crit = "loss", tol = 1e-4, maxit = 1e4) {
     .Call('_GLASSOO_lassoc', PACKAGE = 'GLASSOO', XX, XY, initB, initH, lam, crit, tol, maxit)
