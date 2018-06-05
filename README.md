@@ -1,6 +1,8 @@
 GLASSOO
 ================
 
+[![Build
+Status](https://travis-ci.org/MGallow/GLASSOO.svg?branch=master)](https://travis-ci.org/MGallow/GLASSOO)
 [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/GLASSOO)](https://cran.r-project.org/package=GLASSOO)
 
 ## Overview
@@ -28,8 +30,8 @@ devtools::install_github("MGallow/GLASSOO")
 
 If there are any issues/bugs, please let me know:
 [github](https://github.com/MGallow/GLASSOO/issues). You can also
-contact me via my [website](http://users.stat.umn.edu/~gall0441/). Pull
-requests are welcome\!
+contact me via my [website](https://mgallow.github.io/). Pull requests
+are welcome\!
 
 ## Usage
 

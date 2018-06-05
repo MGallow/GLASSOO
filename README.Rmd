@@ -8,6 +8,7 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+[![Build Status](https://travis-ci.org/MGallow/GLASSOO.svg?branch=master)](https://travis-ci.org/MGallow/GLASSOO)
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/GLASSOO)](https://cran.r-project.org/package=GLASSOO)
 
 ## Overview
