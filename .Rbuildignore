@@ -1,0 +1,11 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^README\.Rmd$
+^README\.md$
+^\.travis\.yml$
+^lik\.gif$
+^docs$
+^README_files$
+^GLASSOO\.pdf$
+^_pkgdown\.yml$
+^pkgdown$
