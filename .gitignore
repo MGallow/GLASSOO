@@ -12,3 +12,4 @@ src/*.dll
 .rdx
 GLASSOO.Rproj
 inst/doc
+docs
