@@ -13,5 +13,5 @@ src/*.dll
 GLASSOO.Rproj
 inst/doc
 docs
-vignettes/Tutorial_cache/html/__packages
-vignettes/Benchmark_cache/html__packages
+vignettes/Tutorial_cache/
+vignettes/Benchmark_cache/
