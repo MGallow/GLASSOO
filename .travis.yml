@@ -1,6 +1,7 @@
 # Thanks to jtilly (https://github.com/jtilly/R-travis-container-example/blob/master/.travis.yml)
 
 language: r
+pandoc_version: 2.2.1
 dist: trusty
 sudo: false
 

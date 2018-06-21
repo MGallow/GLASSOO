@@ -9,11 +9,11 @@ template:
     bootswatch: flatly
     ganalytics: UA-84680750-5
     
-reference:
-  - title: GLASSO functions and methods
-    contents:
-    - GLASSO
-    - plot.GLASSO
+#reference:
+#  - title: GLASSO functions and methods
+#    contents:
+#    - GLASSO
+#    - plot.GLASSO
 
 navbar:
   #type: inverse
