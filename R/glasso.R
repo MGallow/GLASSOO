@@ -42,8 +42,8 @@
 #' 
 #' @return returns class object \code{GLASSOO} which includes:
 #' \item{Call}{function call.}
-#' \item{Iterations}{number of iterations}
-#' \item{Tuning}{optimal tuning parameters (lam and alpha).}
+#' \item{Iterations}{number of iterations/}
+#' \item{Tuning}{optimal tuning parameters.}
 #' \item{Lambdas}{grid of lambda values for CV.}
 #' \item{maxit.out}{maximum number of iterations for outer (blockwise) loop.}
 #' \item{maxit.in}{maximum number of iterations for inner (lasso) loop.}
@@ -128,12 +128,12 @@ GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
         stop("Number of cores must be positive!")
     }
     if (cores > 1 && path) {
-        cat("\nParallelization not possible when producing solution path. Setting cores = 1...")
+        cat("Parallelization not possible when producing solution path. Setting cores = 1...\n\n")
         cores = 1
     }
     K = ifelse(path, 1, K)
     if (cores > K) {
-        cat("\nNumber of cores exceeds K... setting cores = K")
+        cat("Number of cores exceeds K... setting cores = K\n\n")
         cores = K
     }
     if (is.null(adjmaxit.out)) {
@@ -161,11 +161,11 @@ GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
     # compute grid of lam values, if necessary
     if (is.null(lam)) {
         if (!((lam.min.ratio <= 1) && (lam.min.ratio > 0))) {
-            cat("\nlam.min.ratio must be in (0, 1]... setting to 1e-2!")
+            cat("lam.min.ratio must be in (0, 1]... setting to 1e-2!\n\n")
             lam.min.ratio = 0.01
         }
         if (!((nlam > 0) && (nlam%%1 == 0))) {
-            cat("\nnlam must be a positive integer... setting to 10!")
+            cat("nlam must be a positive integer... setting to 10!\n\n")
             nlam = 10
         }
         
