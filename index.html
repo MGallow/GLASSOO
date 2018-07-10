@@ -110,7 +110,10 @@
 <div id="overview" class="section level2">
 <h2 class="hasAnchor">
 <a href="#overview" class="anchor"></a>Overview</h2>
-<p><code>GLASSO</code> is an R package that estimates a penalized precision matrix via block-wise coordinate descent – also known as the graphical lasso (glasso) algorithm. A (possibly incomplete) list of functions contained in the package can be found below:</p>
+<center>
+<img src="https://github.com/MGallow/GLASSOO/raw/master/vignettes/images/gif.gif">
+</center>
+<p><code>GLASSOO</code> is an R package that estimates a lasso-penalized precision matrix via block-wise coordinate descent – also known as the graphical lasso (glasso) algorithm. This package is similar to <a href="https://mgallow.github.io/CVglasso/">CVglasso</a> – but rather than being a wrapper around the <a href="https://cran.r-project.org/web/packages/glasso/index.html">glasso</a> package, the code is completely re-written in C++. A (possibly incomplete) list of functions contained in the package can be found below:</p>
 <ul>
 <li><p><code><a href="reference/GLASSO.html">GLASSO()</a></code> computes the estimated precision matrix</p></li>
 <li><p><code><a href="reference/plot.GLASSO.html">plot.GLASSO()</a></code> produces a heat map or line graph for cross validation errors</p></li>
