@@ -7,21 +7,23 @@ Status](https://travis-ci.org/MGallow/GLASSOO.svg?branch=master)](https://travis
 
 ## Overview
 
-<p align="center">
-
-<img src = "https://github.com/MGallow/GLASSOO/raw/master/vignettes/images/gif.gif"/>
-
-</p>
-
 `GLASSOO` is an R package that estimates a lasso-penalized precision
 matrix via block-wise coordinate descent – also known as the graphical
 lasso (glasso) algorithm. This package is similar to
 [CVglasso](https://mgallow.github.io/CVglasso/) – but rather than being
 a wrapper around the
 [glasso](https://cran.r-project.org/web/packages/glasso/index.html)
-package, the code is completely re-written in C++. A (possibly
-incomplete) list of functions contained in the package can be found
-below:
+package, the code is completely re-written in
+C++.
+
+<p align="center">
+
+<img src = "https://github.com/MGallow/GLASSOO/raw/master/vignettes/images/gif.gif"/>
+
+</p>
+
+A (possibly incomplete) list of functions contained in the package can
+be found below:
 
   - `GLASSO()` computes the estimated precision matrix
 
