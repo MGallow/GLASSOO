@@ -7,11 +7,11 @@ Status](https://travis-ci.org/MGallow/GLASSOO.svg?branch=master)](https://travis
 
 ## Overview
 
-<center>
+<p align="center">
 
-![](https://github.com/MGallow/GLASSOO/raw/master/vignettes/images/gif.gif)
+<img src = "https://github.com/MGallow/GLASSOO/raw/master/vignettes/images/gif.gif"/>
 
-</center>
+</p>
 
 `GLASSOO` is an R package that estimates a lasso-penalized precision
 matrix via block-wise coordinate descent – also known as the graphical
