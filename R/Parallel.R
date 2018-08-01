@@ -31,10 +31,11 @@
 # we define the CV_GLASSOc function
 CVP_GLASSO = function(X = NULL, lam = 10^seq(-2, 2, 0.2), 
     diagonal = FALSE, crit.out = c("avg", "max"), crit.in = c("loss", 
-        "avg", "max"), tol.out = 1e-04, tol.in = 1e-04, maxit.out = 10000, 
-    maxit.in = 10000, adjmaxit.out = NULL, K = 5, crit.cv = c("loglik", 
-        "AIC", "BIC"), start = c("warm", "cold"), cores = 1, 
-    trace = c("progress", "print", "none")) {
+        "avg", "max"), tol.out = 1e-04, tol.in = 1e-04, 
+    maxit.out = 10000, maxit.in = 10000, adjmaxit.out = NULL, 
+    K = 5, crit.cv = c("loglik", "AIC", "BIC"), start = c("warm", 
+        "cold"), cores = 1, trace = c("progress", "print", 
+        "none")) {
     
     # match values
     crit.out = match.arg(crit.out)

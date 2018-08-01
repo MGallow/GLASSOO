@@ -54,8 +54,8 @@ GLASSO(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
 \value{
 returns class object \code{GLASSOO} which includes:
 \item{Call}{function call.}
-\item{Iterations}{number of iterations}
-\item{Tuning}{optimal tuning parameters (lam and alpha).}
+\item{Iterations}{number of iterations/}
+\item{Tuning}{optimal tuning parameters.}
 \item{Lambdas}{grid of lambda values for CV.}
 \item{maxit.out}{maximum number of iterations for outer (blockwise) loop.}
 \item{maxit.in}{maximum number of iterations for inner (lasso) loop.}

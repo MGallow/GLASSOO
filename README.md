@@ -30,7 +30,7 @@ be found below:
   - `plot.GLASSO()` produces a heat map or line graph for cross
     validation errors
 
-See [vignette](https://mgallow.github.io/GLASSOO/) or
+See package [website](https://mgallow.github.io/GLASSOO/) or
 [manual](https://github.com/MGallow/GLASSOO/blob/master/GLASSOO.pdf).
 
 ## Installation
@@ -80,7 +80,7 @@ S.sqrt = out$vectors %*% diag(out$values^0.5) %*% t(out$vectors)
 X = Z %*% S.sqrt
 
 # calculate sample covariance
-Sample = (nrow(X) - 1)/nrow(X)*cov(X)
+sample = (nrow(X) - 1)/nrow(X)*cov(X)
 
 # print sample precision matrix (perhaps a bad estimate)
 round(qr.solve(cov(X)), 5)
@@ -95,11 +95,11 @@ round(qr.solve(cov(X)), 5)
 
 ``` r
 # GLASSO (lam = 0.5)
-GLASSO(S = Sample, lam = 0.5)
+GLASSO(S = sample, lam = 0.5)
 ```
 
     ## 
-    ## Call: GLASSO(S = Sample, lam = 0.5)
+    ## Call: GLASSO(S = sample, lam = 0.5)
     ## 
     ## Iterations:
     ## [1] 3

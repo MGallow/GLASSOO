@@ -99,10 +99,10 @@
 GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01, 
     lam = NULL, diagonal = FALSE, path = FALSE, crit.out = c("avg", 
         "max"), crit.in = c("loss", "avg", "max"), tol.out = 1e-04, 
-    tol.in = 1e-04, maxit.out = 10000, maxit.in = 10000, adjmaxit.out = NULL, 
-    K = 5, crit.cv = c("loglik", "AIC", "BIC"), start = c("warm", 
-        "cold"), cores = 1, trace = c("progress", "print", 
-        "none")) {
+    tol.in = 1e-04, maxit.out = 10000, maxit.in = 10000, 
+    adjmaxit.out = NULL, K = 5, crit.cv = c("loglik", "AIC", 
+        "BIC"), start = c("warm", "cold"), cores = 1, trace = c("progress", 
+        "print", "none")) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -160,7 +160,8 @@ GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
     
     # compute grid of lam values, if necessary
     if (is.null(lam)) {
-        if (!((lam.min.ratio <= 1) && (lam.min.ratio > 0))) {
+        if (!((lam.min.ratio <= 1) && (lam.min.ratio > 
+            0))) {
             cat("lam.min.ratio must be in (0, 1]... setting to 1e-2!\n\n")
             lam.min.ratio = 0.01
         }
@@ -191,10 +192,11 @@ GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
             
             # execute CVP_GLASSO
             GLASSO = CVP_GLASSO(X = X, lam = lam, diagonal = diagonal, 
-                crit.out = crit.out, crit.in = crit.in, tol.out = tol.out, 
-                tol.in = tol.in, maxit.out = maxit.out, maxit.in = maxit.in, 
-                adjmaxit.out = adjmaxit.out, K = K, crit.cv = crit.cv, 
-                start = start, cores = cores, trace = trace)
+                crit.out = crit.out, crit.in = crit.in, 
+                tol.out = tol.out, tol.in = tol.in, maxit.out = maxit.out, 
+                maxit.in = maxit.in, adjmaxit.out = adjmaxit.out, 
+                K = K, crit.cv = crit.cv, start = start, 
+                cores = cores, trace = trace)
             MIN.error = GLASSO$min.error
             AVG.error = GLASSO$avg.error
             CV.error = GLASSO$cv.error
@@ -205,11 +207,12 @@ GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
             if (is.null(X)) {
                 X = matrix(0)
             }
-            GLASSO = CV_GLASSOc(X = X, S = S, lam = lam, diagonal = diagonal, 
-                path = path, crit_out = crit.out, crit_in = crit.in, 
-                tol_out = tol.out, tol_in = tol.in, maxit_out = maxit.out, 
-                maxit_in = maxit.in, adjmaxit_out = adjmaxit.out, 
-                K = K, crit_cv = crit.cv, start = start, trace = trace)
+            GLASSO = CV_GLASSOc(X = X, S = S, lam = lam, 
+                diagonal = diagonal, path = path, crit_out = crit.out, 
+                crit_in = crit.in, tol_out = tol.out, tol_in = tol.in, 
+                maxit_out = maxit.out, maxit_in = maxit.in, 
+                adjmaxit_out = adjmaxit.out, K = K, crit_cv = crit.cv, 
+                start = start, trace = trace)
             MIN.error = GLASSO$min.error
             AVG.error = GLASSO$avg.error
             CV.error = GLASSO$cv.error
@@ -226,14 +229,15 @@ GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
         # specify initial estimate for Sigma
         if (diagonal) {
             
-            # simply force init to be positive definite final diagonal
-            # elements will be increased by lam
+            # simply force init to be positive definite final
+            # diagonal elements will be increased by lam
             init = S + GLASSO$lam
             
         } else {
             
             # provide estimate that is pd and dual feasible
-            alpha = min(c(GLASSO$lam/max(abs(Sminus)), 1))
+            alpha = min(c(GLASSO$lam/max(abs(Sminus)), 
+                1))
             init = (1 - alpha) * S
             diag(init) = diag(S)
             
@@ -256,8 +260,8 @@ GLASSO = function(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
         # specify initial estimate for Sigma
         if (diagonal) {
             
-            # simply force init to be positive definite final diagonal
-            # elements will be increased by lam
+            # simply force init to be positive definite final
+            # diagonal elements will be increased by lam
             init = S + lam
             
         } else {
@@ -331,8 +335,8 @@ print.GLASSO = function(x, ...) {
     }
     
     # print call
-    cat("\nCall: ", paste(deparse(x$Call), sep = "\n", collapse = "\n"), 
-        "\n", sep = "")
+    cat("\nCall: ", paste(deparse(x$Call), sep = "\n", 
+        collapse = "\n"), "\n", sep = "")
     
     # print iterations
     cat("\nIterations:\n")
@@ -343,8 +347,8 @@ print.GLASSO = function(x, ...) {
     print.default(round(x$Tuning, 3), print.gap = 2L, quote = FALSE)
     
     # print loglik
-    cat("\nLog-likelihood: ", paste(round(x$Loglik, 5), sep = "\n", 
-        collapse = "\n"), "\n", sep = "")
+    cat("\nLog-likelihood: ", paste(round(x$Loglik, 5), 
+        sep = "\n", collapse = "\n"), "\n", sep = "")
     
     # print Omega if dim <= 10
     if (nrow(x$Omega) <= 10) {
@@ -394,8 +398,8 @@ print.GLASSO = function(x, ...) {
 #' # produce CV heat map for GLASSO
 #' plot(GLASSO(X), type = 'heatmap')
 
-plot.GLASSO = function(x, type = c("line", "heatmap"), footnote = TRUE, 
-    ...) {
+plot.GLASSO = function(x, type = c("line", "heatmap"), 
+    footnote = TRUE, ...) {
     
     # check
     type = match.arg(type)
