@@ -21,12 +21,14 @@ navbar:
   left:
     - icon: fa-home fa-lg
       href: index.html
-    - text: "Tutorial"
-      href: articles/Tutorial.html
-    - text: "Benchmark"
-      href: articles/Benchmark.html
-    - text: "Functions"
-      href: reference/index.html
+    - text: Articles
+      menu:
+        - text: "Tutorial"
+          href: articles/Tutorial.html
+        - text: "Benchmark"
+          href: articles/Benchmark.html
+        - text: "Functions"
+          href: reference/index.html
     - text: "Related Packages"
       menu:
         #- text: "Omega"
