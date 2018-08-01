@@ -48,14 +48,23 @@
      
   </a>
 </li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Articles
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
 <li>
-  <a href="../articles/Tutorial.html">Tutorial</a>
-</li>
-<li>
-  <a href="../articles/Benchmark.html">Benchmark</a>
-</li>
-<li>
-  <a href="../reference/index.html">Functions</a>
+      <a href="../articles/Tutorial.html">Tutorial</a>
+    </li>
+    <li>
+      <a href="../articles/Benchmark.html">Benchmark</a>
+    </li>
+    <li>
+      <a href="../reference/index.html">Functions</a>
+    </li>
+  </ul>
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -152,10 +161,10 @@
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="co"># benchmark CVglasso - defaults</span></a>
 <a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw"><a href="http://www.rdocumentation.org/packages/microbenchmark/topics/microbenchmark">microbenchmark</a></span>(<span class="kw"><a href="../reference/GLASSO.html">GLASSO</a></span>(<span class="dt">S =</span> sample, <span class="dt">lam =</span> <span class="fl">0.1</span>, <span class="dt">trace =</span> <span class="st">"none"</span>))</a></code></pre></div>
 <pre><code>## Unit: milliseconds
-##                                           expr      min      lq     mean
-##  GLASSO(S = sample, lam = 0.1, trace = "none") 165.4278 169.983 194.4638
-##   median       uq     max neval
-##  171.983 184.6482 331.172   100</code></pre>
+##                                           expr      min       lq     mean
+##  GLASSO(S = sample, lam = 0.1, trace = "none") 169.3704 173.3424 175.9905
+##    median       uq      max neval
+##  174.9908 177.0388 199.4217   100</code></pre>
 <p><br></p>
 <ul>
 <li>Default convergence tolerance with cross validation for <code>lam</code>:</li>
@@ -165,9 +174,9 @@
 <a class="sourceLine" id="cb4-2" data-line-number="2"><span class="kw"><a href="http://www.rdocumentation.org/packages/microbenchmark/topics/microbenchmark">microbenchmark</a></span>(<span class="kw"><a href="../reference/GLASSO.html">GLASSO</a></span>(X, <span class="dt">trace =</span> <span class="st">"none"</span>), <span class="dt">times =</span> <span class="dv">5</span>)</a></code></pre></div>
 <pre><code>## Unit: seconds
 ##                       expr      min       lq     mean   median       uq
-##  GLASSO(X, trace = "none") 9.416975 9.695224 10.90496 10.52855 10.86398
+##  GLASSO(X, trace = "none") 9.408677 9.451392 9.946536 10.09357 10.24701
 ##       max neval
-##  14.02007     5</code></pre>
+##  10.53203     5</code></pre>
 <p><br></p>
 <ul>
 <li>Parallel (<code>cores = 2</code>) cross validation:</li>
@@ -177,9 +186,9 @@
 <a class="sourceLine" id="cb6-2" data-line-number="2"><span class="kw"><a href="http://www.rdocumentation.org/packages/microbenchmark/topics/microbenchmark">microbenchmark</a></span>(<span class="kw"><a href="../reference/GLASSO.html">GLASSO</a></span>(X, <span class="dt">cores =</span> <span class="dv">2</span>, <span class="dt">trace =</span> <span class="st">"none"</span>), <span class="dt">times =</span> <span class="dv">5</span>)</a></code></pre></div>
 <pre><code>## Unit: seconds
 ##                                  expr      min       lq     mean   median
-##  GLASSO(X, cores = 2, trace = "none") 7.506555 8.271162 8.691938 8.636057
+##  GLASSO(X, cores = 2, trace = "none") 7.057724 7.063606 7.374455 7.322304
 ##        uq      max neval
-##  9.001323 10.04459     5</code></pre>
+##  7.337788 8.090854     5</code></pre>
 <p><br></p>
   </div>
 
