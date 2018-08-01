@@ -29,6 +29,7 @@ LinkingTo: Rcpp,
 Suggests: testthat,
     knitr,
     rmarkdown,
-    pkgdown
+    pkgdown,
+    microbenchmark
 SystemRequirements: GNU make
 VignetteBuilder: knitr
